@@ -1,7 +1,6 @@
 import unittest
 
-import numpy as np
-
+from feathernet.dl.initializers import he_initializer
 from feathernet.dl.layers.activations import ReLU
 from feathernet.dl.layers.core import Dense
 from feathernet.dl.losses import MeanSquaredError, CrossEntropy
@@ -46,7 +45,7 @@ class TestDenseSerialization(unittest.TestCase):
 class TestNetworkSerialization(unittest.TestCase):
     def test_serialization(self) -> None:
         network = Network(SGD(learning_rate=0.01))
-        network.add(Dense(3, 2))
+        network.add(Dense(3, 2, he_initializer))
         network.add(ReLU())
 
         serialized_network = network.serialize()
@@ -54,6 +53,7 @@ class TestNetworkSerialization(unittest.TestCase):
         self.assertIsInstance(serialized_network, list)
         self.assertEqual(len(serialized_network), 2)
         self.assertEqual(serialized_network[0]["type"], "Dense")
+        self.assertEqual(serialized_network[0]["initializer"], "he_initializer")
         self.assertEqual(serialized_network[1]["type"], "ReLU")
 
 

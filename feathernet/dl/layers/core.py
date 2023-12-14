@@ -32,7 +32,7 @@ class Dense(BaseLayer):
             {
                 "input_dim": self.weights.shape[0],
                 "output_dim": self.weights.shape[1],
-                "intializer": self._get_initializer_name()
+                "initializer": self._get_initializer_name()
             }
         )
         return serialized_data
