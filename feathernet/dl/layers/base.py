@@ -26,6 +26,8 @@ class BaseLayer(ABC):
 
     def _get_initializer_name(self) -> str:
         if hasattr(self.initializer, "__name__"):
+            if self.initializer.__name__ == "<lambda>":
+                return "random_initializer"
             return self.initializer.__name__
         else:
-            return "lambda"
+            return "none"

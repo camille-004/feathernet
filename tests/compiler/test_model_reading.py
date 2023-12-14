@@ -2,6 +2,7 @@ import unittest
 
 from feathernet.dl.initializers import he_initializer
 from feathernet.dl.layers.activations import ReLU
+from feathernet.dl.layers.convolution import Conv2D
 from feathernet.dl.layers.core import Dense
 from feathernet.dl.losses import CrossEntropy, MeanSquaredError
 from feathernet.dl.network import Network
@@ -40,6 +41,22 @@ class TestDenseSerialization(unittest.TestCase):
         self.assertEqual(serialized_data["type"], "Dense")
         self.assertEqual(serialized_data["input_dim"], input_dim)
         self.assertEqual(serialized_data["output_dim"], output_dim)
+
+
+class TestConv2DSerialization(unittest.TestCase):
+    def test_serialization(self) -> None:
+        conv2d = Conv2D(
+            input_dim=1, output_dim=2, kernel_size=3, stride=1, padding=0
+        )
+        serialized_data = conv2d.serialize()
+
+        self.assertEqual(serialized_data["type"], "Conv2D")
+        self.assertEqual(serialized_data["input_dim"], 1)
+        self.assertEqual(serialized_data["output_dim"], 2)
+        self.assertEqual(serialized_data["kernel_size"], 3)
+        self.assertEqual(serialized_data["stride"], 1)
+        self.assertEqual(serialized_data["padding"], 0)
+        self.assertEqual(serialized_data["initializer"], "random_initializer")
 
 
 class TestNetworkSerialization(unittest.TestCase):
