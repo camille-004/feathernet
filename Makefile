@@ -23,4 +23,5 @@ format:
 
 test-coverage:
 	coverage run -m unittest discover -s $(TEST_DIR)
+	coverage report
 	coverage report --fail-under=80
