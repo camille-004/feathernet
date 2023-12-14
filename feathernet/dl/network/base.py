@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 
 from feathernet.dl.layers.base import BaseLayer
@@ -40,3 +42,6 @@ class Network:
             self.backward(output_grad)
             if epoch % 10 == 0:
                 print(f"Epoch {epoch}, Loss: {loss}")
+
+    def serialize(self) -> list[dict[str, Any]]:
+        return [layer.serialize() for layer in self.layers]

@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable
 
 import numpy as np
 
@@ -25,3 +25,14 @@ class Dense(BaseLayer):
         self.bias_grad = np.sum(output_grad, axis=0)
 
         return np.dot(output_grad, self.weights.T)
+
+    def serialize(self) -> dict[str, Any]:
+        serialized_data = super().serialize()
+        serialized_data.update(
+            {
+                "input_dim": self.weights.shape[0],
+                "output_dim": self.weights.shape[1],
+                "intializer": self._get_initializer_name()
+            }
+        )
+        return serialized_data

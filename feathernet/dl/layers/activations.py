@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Any
 
 import numpy as np
 
@@ -16,6 +17,9 @@ class Activation(BaseLayer):
     @abstractmethod
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
         pass
+
+    def serialize(self) -> dict[str, Any]:
+        return super().serialize()
 
 
 class ReLU(Activation):

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 import numpy as np
 
@@ -14,6 +15,11 @@ class Loss(ABC):
     ) -> np.ndarray:
         """Calculate the gradient of the loss w.r.t. the predictions."""
         pass
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "type": self.__class__.__name__
+        }
 
 
 class MeanSquaredError(Loss):
