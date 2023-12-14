@@ -44,7 +44,7 @@ jobs:
       - name: Run compiler tests
         run: |
           coverage run --rcfile=.coveragerc_compiler -m unittest discover tests.compiler
-          coverage report --fail-under 75
+          coverage report --fail-under 80
 
       - name: Run DL tests
         run: |
