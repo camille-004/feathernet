@@ -1,0 +1,47 @@
+name: Feathernet CI
+
+on: [push, pull_request]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/feathernet:latest
+
+  test:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/feathernet:latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Run lint and format
+        run: |
+          poetry run make format
+          poetry run make lint
+
+      - name: Run compiler tests
+        run: poetry run python -m unittest discover tests.compiler
+
+      - name: Run DL tests
+        run: poetry run python -m unittest discover tests.dl
