@@ -9,7 +9,7 @@ class Dense(BaseLayer):
     def __init__(
         self, input_dim: int, output_dim: int, initializer: Callable = None
     ) -> None:
-        super().__init__(initializer)
+        super(Dense, self).__init__(initializer)
         self.inputs = None
         self.weights = self.initializer((input_dim, output_dim))
         self.bias = np.zeros(output_dim)

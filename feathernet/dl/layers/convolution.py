@@ -14,8 +14,8 @@ class Conv2D(BaseLayer):
         stride: int = 1,
         padding: int = 0,
         initializer: Callable = None,
-    ):
-        super().__init__(initializer)
+    ) -> None:
+        super(Conv2D, self).__init__(initializer)
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.kernel_size = kernel_size

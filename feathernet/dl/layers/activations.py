@@ -8,7 +8,7 @@ from feathernet.dl.layers.base import BaseLayer
 
 class Activation(BaseLayer):
     def __init__(self):
-        super().__init__()
+        super(Activation, self).__init__()
 
     @abstractmethod
     def forward(self, inputs: np.ndarray) -> np.ndarray:
@@ -24,7 +24,7 @@ class Activation(BaseLayer):
 
 class ReLU(Activation):
     def __init__(self):
-        super().__init__()
+        super(ReLU, self).__init__()
         self.inputs = None
 
     def forward(self, inputs: np.ndarray) -> np.ndarray:
@@ -37,7 +37,7 @@ class ReLU(Activation):
 
 class Sigmoid(Activation):
     def __init__(self):
-        super().__init__()
+        super(Sigmoid, self).__init__()
         self.output = None
 
     def forward(self, inputs: np.ndarray) -> np.ndarray:
@@ -50,7 +50,7 @@ class Sigmoid(Activation):
 
 class Softmax(Activation):
     def __init__(self):
-        super().__init__()
+        super(Softmax, self).__init__()
         self.output = None
 
     def forward(self, inputs: np.ndarray) -> np.ndarray:

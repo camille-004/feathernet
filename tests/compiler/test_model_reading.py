@@ -4,6 +4,7 @@ from feathernet.dl.initializers import he_initializer
 from feathernet.dl.layers.activations import ReLU
 from feathernet.dl.layers.convolution import Conv2D
 from feathernet.dl.layers.core import Dense
+from feathernet.dl.layers.pooling import Pooling
 from feathernet.dl.losses import CrossEntropy, MeanSquaredError
 from feathernet.dl.network import Network
 from feathernet.dl.optimizers import SGD
@@ -57,6 +58,26 @@ class TestConv2DSerialization(unittest.TestCase):
         self.assertEqual(serialized_data["stride"], 1)
         self.assertEqual(serialized_data["padding"], 0)
         self.assertEqual(serialized_data["initializer"], "random_initializer")
+
+
+class TestPoolingSerialization(unittest.TestCase):
+    def test_serialize_max_pool(self) -> None:
+        pool = Pooling(pool_size=2, stride=2, strategy="max")
+        serialized_data = pool.serialize()
+
+        self.assertEqual(serialized_data["type"], "Pooling")
+        self.assertEqual(serialized_data["pool_size"], 2)
+        self.assertEqual(serialized_data["stride"], 2)
+        self.assertEqual(serialized_data["strategy"], "max")
+
+    def test_serialize_avg_pool(self) -> None:
+        pool = Pooling(pool_size=2, stride=2, strategy="average")
+        serialized_data = pool.serialize()
+
+        self.assertEqual(serialized_data["type"], "Pooling")
+        self.assertEqual(serialized_data["pool_size"], 2)
+        self.assertEqual(serialized_data["stride"], 2)
+        self.assertEqual(serialized_data["strategy"], "average")
 
 
 class TestNetworkSerialization(unittest.TestCase):
