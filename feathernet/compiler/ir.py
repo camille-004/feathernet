@@ -11,15 +11,24 @@ class ModelIR:
     """
 
     def __init__(self) -> None:
-        self.layers = []
+        self.nodes = []
+        self.edges = []
         self.optimizer = None
 
-    def add_layer(self, layer_type: str, **params: Any) -> None:
-        layer = {"type": layer_type, "params": params}
-        self.layers.append(layer)
+    def add_node(self, layer_type: str, **params: Any) -> None:
+        node = {"type": layer_type, "params": params}
+        self.nodes.append(node)
+
+    def add_edge(self, from_node: int, to_node: int) -> None:
+        edge = {"from": from_node, "to": to_node}
+        self.edges.append(edge)
 
     def serialize(self) -> list:
-        return {"layers": self.layers, "optimizer": self.optimizer}
+        return {
+            "nodes": self.nodes,
+            "edges": self.edges,
+            "optimizer": self.optimizer,
+        }
 
 
 def create_ir_from_model(model: Network) -> ModelIR:
@@ -27,8 +36,10 @@ def create_ir_from_model(model: Network) -> ModelIR:
     ir = ModelIR()
     network_data = model.serialize()
 
-    for layer_data in network_data["layers"]:
-        ir.add_layer(layer_data["type"], **layer_data)
+    for i, layer_data in enumerate(network_data["layers"]):
+        ir.add_node(layer_data["type"], **layer_data)
+        if i > 0:
+            ir.add_edge(i - 1, i)
 
     ir.optimizer = network_data["optimizer"]
     return ir
