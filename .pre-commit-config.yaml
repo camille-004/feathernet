@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.5.0
     hooks:
       - id: trailing-whitespace
       - id: check-yaml
@@ -8,12 +8,13 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/psf/black
-    rev: 21.5b2
+    rev: 23.12.0
     hooks:
       - id: black
         args: [--line-length=79]
 
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.2
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
     hooks:
       - id: flake8
+        args: ['--ignore=D100,D101,D102,D104,D107,D202,E501']

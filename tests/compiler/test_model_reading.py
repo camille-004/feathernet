@@ -3,7 +3,7 @@ import unittest
 from feathernet.dl.initializers import he_initializer
 from feathernet.dl.layers.activations import ReLU
 from feathernet.dl.layers.core import Dense
-from feathernet.dl.losses import MeanSquaredError, CrossEntropy
+from feathernet.dl.losses import CrossEntropy, MeanSquaredError
 from feathernet.dl.network.base import Network
 from feathernet.dl.optimizers import SGD
 
@@ -53,9 +53,11 @@ class TestNetworkSerialization(unittest.TestCase):
         self.assertIsInstance(serialized_network, list)
         self.assertEqual(len(serialized_network), 2)
         self.assertEqual(serialized_network[0]["type"], "Dense")
-        self.assertEqual(serialized_network[0]["initializer"], "he_initializer")
+        self.assertEqual(
+            serialized_network[0]["initializer"], "he_initializer"
+        )
         self.assertEqual(serialized_network[1]["type"], "ReLU")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

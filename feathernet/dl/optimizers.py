@@ -10,9 +10,7 @@ class Optimizer(ABC):
         pass
 
     def serialize(self) -> dict[str, Any]:
-        return {
-            "type": self.__class__.__name__
-        }
+        return {"type": self.__class__.__name__}
 
 
 class SGD(Optimizer):

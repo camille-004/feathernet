@@ -11,7 +11,7 @@ jobs:
       packages: write
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v1
@@ -36,12 +36,18 @@ jobs:
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Run lint and format
         run: |
           poetry run make format
           poetry run make lint
+
+      - name: List installed packages
+        run: poetry run pip list
+
+      - name: Show Python path
+        run: echo $PYTHONPATH
 
       - name: Run compiler tests
         run: poetry run python -m unittest discover tests.compiler
