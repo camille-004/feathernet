@@ -3,7 +3,49 @@ import unittest
 import numpy as np
 
 from feathernet.dl.layers.convolution import Conv2D
+from feathernet.dl.layers.core import BatchNorm, Dropout
 from feathernet.dl.layers.pooling import Pooling
+
+
+class TestBatchNorm(unittest.TestCase):
+    def setUp(self) -> None:
+        self.batch_norm = BatchNorm()
+
+    def test_forward(self) -> None:
+        inputs = np.random.rand(5, 10)
+        output = self.batch_norm.forward(inputs)
+        self.assertEqual(output.shape, inputs.shape)
+
+    def test_backward(self) -> None:
+        inputs = np.random.rand(5, 10)
+        self.batch_norm.forward(inputs)
+        output_grad = np.random.rand(5, 10)
+        input_grad = self.batch_norm.backward(output_grad)
+        self.assertEqual(input_grad.shape, inputs.shape)
+
+
+class TestDropout(unittest.TestCase):
+    def setUp(self) -> None:
+        self.dropout = Dropout(rate=0.5)
+
+    def test_forward_training(self) -> None:
+        inputs = np.random.rand(5, 10)
+        output = self.dropout.forward(inputs, training=True)
+        self.assertEqual(output.shape, inputs.shape)
+
+    def test_forward_inference(self):
+        inputs = np.random.rand(5, 10)
+        output = self.dropout.forward(inputs, training=False)
+        np.testing.assert_array_almost_equal(
+            output, inputs * (1 - self.dropout.rate)
+        )
+
+    def test_backward(self):
+        inputs = np.random.rand(5, 10)
+        self.dropout.forward(inputs, training=True)
+        output_grad = np.random.rand(5, 10)
+        input_grad = self.dropout.backward(output_grad)
+        self.assertEqual(input_grad.shape, inputs.shape)
 
 
 class TestConv2D(unittest.TestCase):

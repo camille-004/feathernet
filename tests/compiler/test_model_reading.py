@@ -1,9 +1,11 @@
 import unittest
 
+import numpy as np
+
 from feathernet.dl.initializers import he_initializer
 from feathernet.dl.layers.activations import ReLU
 from feathernet.dl.layers.convolution import Conv2D
-from feathernet.dl.layers.core import Dense
+from feathernet.dl.layers.core import BatchNorm, Dense, Dropout
 from feathernet.dl.layers.pooling import Pooling
 from feathernet.dl.losses import CrossEntropy, MeanSquaredError
 from feathernet.dl.network import Network
@@ -31,6 +33,37 @@ class TestSGDSerialization(unittest.TestCase):
         serialized_sgd = sgd.serialize()
         self.assertEqual(serialized_sgd["type"], "SGD")
         self.assertEqual(serialized_sgd["learning_rate"], learning_rate)
+
+
+class TestBatchNormSerialization(unittest.TestCase):
+    def test_serialization(self) -> None:
+        epsilon = 1e-5
+        batch_norm = BatchNorm(epsilon=epsilon)
+
+        inputs = np.random.randn(5, 10)
+        batch_norm.forward(inputs)
+
+        serialized_data = batch_norm.serialize()
+
+        self.assertEqual(serialized_data["type"], "BatchNorm")
+        self.assertEqual(serialized_data["epsilon"], epsilon)
+
+        np.testing.assert_array_almost_equal(
+            serialized_data["mean"], batch_norm.mean
+        )
+        np.testing.assert_array_almost_equal(
+            serialized_data["variance"], batch_norm.variance
+        )
+
+
+class TestDropoutSerialization(unittest.TestCase):
+    def test_serialization(self) -> None:
+        rate = 0.5
+        dropout = Dropout(rate)
+        serialized_data = dropout.serialize()
+
+        self.assertEqual(serialized_data["type"], "Dropout")
+        self.assertEqual(serialized_data["rate"], rate)
 
 
 class TestDenseSerialization(unittest.TestCase):
