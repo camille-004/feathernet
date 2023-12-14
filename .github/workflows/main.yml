@@ -1,0 +1,33 @@
+name: Feathernet CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+          poetry --version
+      - name: Install dependencies
+        run: poetry install
+      - name: Lint and format
+        run: |
+          poetry run make lint
+          poetry run make format
+      - name: Run compiler tests
+        run: poetry run python -m unittest discover tests.compiler
+      - name: Run DL tests
+        run: poetry run python -m unittest discover tests.dl
