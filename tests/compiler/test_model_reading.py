@@ -55,3 +55,7 @@ class TestNetworkSerialization(unittest.TestCase):
         self.assertEqual(len(serialized_network), 2)
         self.assertEqual(serialized_network[0]["type"], "Dense")
         self.assertEqual(serialized_network[1]["type"], "ReLU")
+
+
+if __name__ == '__main__':
+    unittest.main()
