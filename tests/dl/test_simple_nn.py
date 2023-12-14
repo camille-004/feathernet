@@ -3,7 +3,7 @@ import unittest
 from feathernet.dl.layers.activations import ReLU
 from feathernet.dl.layers.core import Dense
 from feathernet.dl.losses import CrossEntropy
-from feathernet.dl.network.base import Network
+from feathernet.dl.network import Network
 from feathernet.dl.optimizers import SGD, Optimizer
 from tests.utils.dataset import make_dataset
 

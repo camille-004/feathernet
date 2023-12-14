@@ -18,3 +18,9 @@ format:
 	$(FORMAT) $(SRC_DIR) $(TEST_DIR)
 	@echo "Sorting imports..."
 	$(SORT) $(SRC_DIR) $(TEST_DIR)
+
+.PHONY: test-coverage
+
+test-coverage:
+	coverage run -m unittest discover -s $(TEST_DIR)
+	coverage report --fail-under=80

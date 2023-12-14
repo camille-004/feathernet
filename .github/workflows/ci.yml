@@ -48,7 +48,11 @@ jobs:
         run: poetry update
 
       - name: Run compiler tests
-        run: poetry run python -m unittest discover tests.compiler
+        run: |
+          coverage run -m unittest discover tests.compiler
+          coverage report --fail-under 80
 
       - name: Run DL tests
-        run: poetry run python -m unittest discover tests.dl
+        run: |
+          coverage run -m unittest discover tests.dl
+          coverage report --fail-under 80

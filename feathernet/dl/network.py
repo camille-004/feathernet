@@ -43,5 +43,8 @@ class Network:
             if epoch % 10 == 0:
                 print(f"Epoch {epoch}, Loss: {loss}")
 
-    def serialize(self) -> list[dict[str, Any]]:
-        return [layer.serialize() for layer in self.layers]
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "layers": [layer.serialize() for layer in self.layers],
+            "optimizer": self.optimizer.serialize(),
+        }

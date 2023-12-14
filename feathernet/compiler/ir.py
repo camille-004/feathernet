@@ -1,6 +1,6 @@
 from typing import Any
 
-from feathernet.dl.network.base import Network
+from feathernet.dl.network import Network
 
 
 class ModelIR:
@@ -12,19 +12,23 @@ class ModelIR:
 
     def __init__(self) -> None:
         self.layers = []
+        self.optimizer = None
 
     def add_layer(self, layer_type: str, **params: Any) -> None:
         layer = {"type": layer_type, "params": params}
         self.layers.append(layer)
 
     def serialize(self) -> list:
-        return self.layers
+        return {"layers": self.layers, "optimizer": self.optimizer}
 
 
 def create_ir_from_model(model: Network) -> ModelIR:
     """Convert a model into the IR."""
     ir = ModelIR()
-    for layer in model.layers:
-        layer_data = layer.serialize()
-        ir.add_layer(layer["type"], **layer_data)
+    network_data = model.serialize()
+
+    for layer_data in network_data["layers"]:
+        ir.add_layer(layer_data["type"], **layer_data)
+
+    ir.optimizer = network_data["optimizer"]
     return ir
