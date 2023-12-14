@@ -27,6 +27,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/feathernet:latest
+          no-cache: true
 
   test:
     needs: build-and-push
@@ -43,11 +44,8 @@ jobs:
           poetry run make format
           poetry run make lint
 
-      - name: List installed packages
-        run: poetry run pip list
-
-      - name: Show Python path
-        run: echo $PYTHONPATH
+      - name: Update dependencies
+        run: poetry update
 
       - name: Run compiler tests
         run: poetry run python -m unittest discover tests.compiler
