@@ -17,8 +17,11 @@ class Dense(BaseLayer):
         self.weights_grad = np.zeros_like(self.weights)
         self.bias_grad = np.zeros_like(self.bias)
 
+        self.original_input_shape = None
+
     def forward(self, inputs: np.ndarray) -> np.ndarray:
         if inputs.ndim > 2:  # Flatten
+            self.original_input_shape = inputs.shape
             inputs = inputs.reshape(inputs.shape[0], -1)
 
         self.inputs = inputs
@@ -28,7 +31,12 @@ class Dense(BaseLayer):
         self.weights_grad = np.dot(self.inputs.T, output_grad)
         self.bias_grad = np.sum(output_grad, axis=0)
 
-        return np.dot(output_grad, self.weights.T)
+        if hasattr(self, "original_input_shape"):
+            return np.dot(output_grad, self.weights.T).reshape(
+                self.original_input_shape
+            )
+        else:
+            return np.dot(output_grad, self.weights.T)
 
     def serialize(self) -> dict[str, Any]:
         serialized_data = super().serialize()
@@ -46,22 +54,16 @@ class Dropout(BaseLayer):
     def __init__(self, rate) -> None:
         super(Dropout, self).__init__()
         self.rate = rate
-
         self.mask = None
-        self.flattened_mask = None
 
     def forward(self, inputs: np.ndarray, training: bool = True) -> np.ndarray:
         if training:
             self.mask = np.random.binomial(1, 1 - self.rate, size=inputs.shape)
-            if inputs.ndim > 2:
-                self.flattened_mask = self.mask.reshape(inputs.shape[0], -1)
             return inputs * self.mask
         else:
             return inputs * (1 - self.rate)
 
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
-        if self.flattened_mask is not None:
-            return output_grad * self.flattened_mask
         return output_grad * self.mask
 
     def serialize(self) -> dict[str, Any]:

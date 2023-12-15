@@ -50,8 +50,8 @@ class Conv2D(BaseLayer):
 
         # Dimensions
         N, C, H, W = inputs.shape
-        out_h = (H - self.kernel_size) // self.stride + 1
-        out_w = (W - self.kernel_size) // self.stride + 1
+        out_h = (H + 2 * self.padding - self.kernel_size) // self.stride + 1
+        out_w = (W + 2 * self.padding - self.kernel_size) // self.stride + 1
 
         self.inputs_col = self.im2col(inputs, self.kernel_size, self.stride)
         weights_col = self.weights.reshape(self.output_dim, -1)
@@ -83,8 +83,8 @@ class Conv2D(BaseLayer):
         self, inputs: np.ndarray, kernel_size: int, stride: int
     ) -> np.ndarray:
         N, C, H, W = inputs.shape
-        out_h = (H - kernel_size) // stride + 1
-        out_w = (W - kernel_size) // stride + 1
+        out_h = (H + 2 * self.padding - kernel_size) // stride + 1
+        out_w = (W + 2 * self.padding - kernel_size) // stride + 1
 
         i0 = np.repeat(np.arange(kernel_size), kernel_size)
         i0 = np.tile(i0, C)
@@ -96,7 +96,22 @@ class Conv2D(BaseLayer):
 
         k = np.repeat(np.arange(C), kernel_size * kernel_size).reshape(-1, 1)
 
-        cols = inputs[:, k, i, j]
+        if self.padding > 0:
+            inputs_padded = np.pad(
+                inputs,
+                (
+                    (0, 0),
+                    (0, 0),
+                    (self.padding, self.padding),
+                    (self.padding, self.padding),
+                ),
+                mode="constant",
+                constant_values=0,
+            )
+        else:
+            inputs_padded = inputs
+
+        cols = inputs_padded[:, k, i, j]
         cols = cols.transpose(1, 2, 0).reshape(
             kernel_size * kernel_size * C, -1
         )
@@ -112,27 +127,34 @@ class Conv2D(BaseLayer):
         kernel_size: int,
         stride: int,
     ) -> np.ndarray:
+        H_padded, W_padded = H + 2 * self.padding, W + 2 * self.padding
         H_out = (H - kernel_size) // stride + 1
         W_out = (W - kernel_size) // stride + 1
+
         cols_reshaped = cols.reshape(C * kernel_size * kernel_size, -1, N)
         cols_reshaped = cols_reshaped.transpose(2, 0, 1)
 
-        images = np.zeros((N, C, H + stride - 1, W + stride - 1))
+        images = np.zeros((N, C, H_padded, W_padded))
+
         for i in range(kernel_size):
             for j in range(kernel_size):
                 i_lim = i + stride * H_out
                 j_lim = j + stride * W_out
 
-                cols_slice = cols_reshaped[
-                    :, i * kernel_size + j :: kernel_size**2, :
-                ]
-                cols_slice_reshaped = cols_slice.reshape(N, 1, H_out, W_out)
+                idx_start = i * kernel_size + j
+                cols_slice = cols_reshaped[:, idx_start :: kernel_size**2, :]
+                cols_slice_reshaped = cols_slice.reshape(N, -1, H_out, W_out)
 
                 images[
                     :, :, i:i_lim:stride, j:j_lim:stride
                 ] += cols_slice_reshaped
 
-        return images[:, :, :H, :W]
+        return images[
+            :,
+            :,
+            self.padding : H_padded - self.padding,
+            self.padding : W_padded - self.padding,
+        ]
 
     def serialize(self) -> dict[str, Any]:
         serialized_data = super().serialize()

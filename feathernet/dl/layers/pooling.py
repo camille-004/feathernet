@@ -51,8 +51,8 @@ class Pooling(BaseLayer):
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
         input_grad = np.zeros_like(self.last_input)
 
-        for image in range(self.last_input.shape[0]):
-            for channel in range(self.last_input.shape[1]):
+        for batch in range(output_grad.shape[0]):
+            for channel in range(output_grad.shape[1]):
                 for i in range(output_grad.shape[2]):
                     for j in range(output_grad.shape[3]):
                         h_start, h_end = (
@@ -63,26 +63,37 @@ class Pooling(BaseLayer):
                             j * self.stride,
                             j * self.stride + self.pool_size,
                         )
+                        pool_region = self.last_input[
+                            batch, channel, h_start:h_end, w_start:w_end
+                        ]
 
-                        if self.strategy == "max":
-                            pool_region = self.last_input[
-                                image, channel, h_start:h_end, w_start:w_end
-                            ]
-                            max_val = np.max(pool_region)
-                            mask = pool_region == max_val
-                            input_grad[
-                                image, channel, h_start:h_end, w_start:w_end
-                            ] += (mask * output_grad[image, channel, i, j])
-                        elif self.strategy == "average":
-                            avg_grad = output_grad[image, channel, i, j] / (
-                                self.pool_size**2
-                            )
-                            input_grad[
-                                image, channel, h_start:h_end, w_start:w_end
-                            ] += (
-                                np.ones_like((self.pool_size, self.pool_size))
-                                * avg_grad
-                            )
+                        if pool_region.size > 0:
+                            if self.strategy == "max":
+                                max_val = np.max(pool_region)
+                                mask = pool_region == max_val
+                                input_grad[
+                                    batch,
+                                    channel,
+                                    h_start:h_end,
+                                    w_start:w_end,
+                                ] += (
+                                    mask * output_grad[batch, channel, i, j]
+                                )
+                            elif self.strategy == "average":
+                                avg_grad = output_grad[
+                                    batch, channel, i, j
+                                ] / (self.pool_size**2)
+                                input_grad[
+                                    batch,
+                                    channel,
+                                    h_start:h_end,
+                                    w_start:w_end,
+                                ] += (
+                                    np.ones_like(
+                                        (self.pool_size, self.pool_size)
+                                    )
+                                    * avg_grad
+                                )
 
         return input_grad
 

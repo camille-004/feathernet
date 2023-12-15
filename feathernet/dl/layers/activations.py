@@ -65,20 +65,11 @@ class Sigmoid(Activation):
 class Softmax(Activation):
     def __init__(self):
         super(Softmax, self).__init__()
-        self.output = None
 
     def forward(self, inputs: np.ndarray) -> np.ndarray:
         exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
         probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
-        self.output = probabilities
         return probabilities
 
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
-        if (
-            self.output.ndim > 2
-            and self.output.shape[0] == output_grad.shape[0]
-        ):
-            # reshaped_output = self.output.reshape(output_grad.shape)
-            return output_grad
-
         return output_grad

@@ -34,9 +34,8 @@ class CrossEntropy(Loss):
     def forward(
         self, predictions: np.ndarray, targets: np.ndarray
     ) -> np.ndarray:
-        epsilon = 1e-6
+        epsilon = 1e-12
         predictions = np.clip(predictions, epsilon, 1 - epsilon)
-
         N = predictions.shape[0]
         ce_loss = -np.sum(targets * np.log(predictions)) / N
         return ce_loss
@@ -44,9 +43,6 @@ class CrossEntropy(Loss):
     def backward(
         self, predictions: np.ndarray, targets: np.ndarray
     ) -> np.ndarray:
-        epsilon = 1e-6
-        predictions = np.clip(predictions, epsilon, 1 - epsilon)
-
         N = predictions.shape[0]
-        grad = -targets / predictions / N
+        grad = -(targets / predictions) / N
         return grad
