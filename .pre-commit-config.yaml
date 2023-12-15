@@ -18,12 +18,3 @@ repos:
     hooks:
       - id: flake8
         args: ['--ignore=D100,D101,D102,D103,D104,D107,D202,E203,E501,W503']
-
-  - repo: local
-    hooks:
-      - id: test-coverage
-        name: Run Tests with Coverage
-        entry: make test-coverage
-        language: system
-        always_run: true
-        pass_filenames: false

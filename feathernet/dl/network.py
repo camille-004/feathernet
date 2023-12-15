@@ -19,6 +19,8 @@ class Network:
         output = X
         for layer in self.layers:
             output = layer.forward(output)
+            print(layer.__class__.__name__, X.shape)
+
         return output
 
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
@@ -34,14 +36,29 @@ class Network:
         y_train: np.ndarray,
         epochs: int,
         loss_function: Loss,
+        batch_size: int = 32,
     ) -> None:
+        num_samples = X_train.shape[0]
+        num_batches = num_samples // batch_size
+
         for epoch in range(epochs):
-            output = self.forward(X_train)
-            loss = loss_function.forward(output, y_train)
-            output_grad = loss_function.backward(output, y_train)
-            self.backward(output_grad)
+            for b in range(num_batches):
+                batch_start, batch_end = b * batch_size, (b + 1) * batch_size
+                X_batch, y_batch = (
+                    X_train[batch_start:batch_end],
+                    y_train[batch_start:batch_end],
+                )
+
+                output = self.forward(X_batch)
+                loss = loss_function.forward(output, y_batch)
+                output_grad = loss_function.backward(output, y_batch)
+                self.backward(output_grad)
+
             if epoch % 10 == 0:
                 print(f"Epoch {epoch}, Loss: {loss}")
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        return self.forward(X)
 
     def serialize(self) -> dict[str, Any]:
         return {

@@ -22,96 +22,117 @@ class Conv2D(BaseLayer):
         self.stride = stride
         self.padding = padding
 
-        self.inputs = None
-        self.bias_grad = None
-        self.weights_grad = None
-        self.output_width = None
-        self.output_height = None
-
-        self.weights = self.initializer((input_dim, output_dim))
+        self.weights = self.initializer(
+            (output_dim, input_dim, kernel_size, kernel_size)
+        )
         self.bias = np.zeros(output_dim)
 
+        self.inputs = None
+        self.inputs_col = None
+        self.weights_grad = None
+        self.bias_grad = None
+
     def forward(self, inputs: np.ndarray) -> np.ndarray:
+        if inputs.ndim != 4:
+            raise ValueError("Expected input to Conv2D to be a 4D tensor.")
         if self.padding > 0:
+            pad_width = (
+                (0, 0),
+                (0, 0),
+                (self.padding, self.padding),
+                (self.padding, self.padding),
+            )
             self.inputs = np.pad(
-                inputs,
-                (
-                    (0, 0),
-                    (self.padding, self.padding),
-                    (self.padding, self.padding),
-                ),
-                mode="constant",
-                constant_values=0,
+                inputs, pad_width, mode="constant", constant_values=0
             )
         else:
             self.inputs = inputs
 
-        self.output_height = (
-            self.inputs.shape[2] - self.kernel_size
-        ) // self.stride + 1
-        self.output_width = (
-            self.inputs.shape[3] - self.kernel_size
-        ) // self.stride + 1
+        # Dimensions
+        N, C, H, W = inputs.shape
+        out_h = (H - self.kernel_size) // self.stride + 1
+        out_w = (W - self.kernel_size) // self.stride + 1
 
-        output = np.zeros(
-            (
-                inputs.shape[0],
-                self.output_dim,
-                self.output_height,
-                self.output_width,
-            )
-        )
+        self.inputs_col = self.im2col(inputs, self.kernel_size, self.stride)
+        weights_col = self.weights.reshape(self.output_dim, -1)
 
-        for i in range(self.output_height):
-            for j in range(self.output_width):
-                input_slice = self.inputs[
-                    :,
-                    :,
-                    i * self.stride : i * self.stride + self.kernel_size,
-                    j * self.stride : j * self.stride + self.kernel_size,
-                ]
-                output[:, :, i, j] = (
-                    np.tensordot(
-                        input_slice, self.weights, axes=([1, 2, 3], [1, 2, 3])
-                    )
-                    + self.bias
-                )
-
+        output_col = np.dot(weights_col, self.inputs_col) + self.bias[:, None]
+        output = output_col.reshape(
+            self.output_dim, out_h, out_w, N
+        ).transpose(3, 0, 1, 2)
         return output
 
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
-        # Gradient w.r.t. input
-        input_grad = np.zeros_like(self.inputs)
+        N, C, H, W = self.inputs.shape
+        output_grad_col = output_grad.transpose(1, 2, 3, 0).reshape(
+            self.output_dim, -1
+        )
 
-        # Gradient w.r.t. weights, biases
-        self.weights_grad = np.zeros_like(self.weights)
-        self.bias_grad = np.zeros_like(self.bias)
+        self.weights_grad = np.dot(output_grad_col, self.inputs_col.T).reshape(
+            self.weights.shape
+        )
+        self.bias_grad = np.sum(output_grad_col, axis=1)
 
-        for i in range(self.output_height):
-            for j in range(self.output_width):
-                input_slice = self.inputs[
-                    :,
-                    :,
-                    i * self.stride : i * self.stride + self.kernel_size,
-                    j * self.stride : j * self.stride + self.kernel_size,
+        weights_col = self.weights.reshape(self.output_dim, -1)
+        dX_col = np.dot(weights_col.T, output_grad_col)
+        dX = self.col2im(dX_col, N, C, H, W, self.kernel_size, self.stride)
+
+        return dX
+
+    def im2col(
+        self, inputs: np.ndarray, kernel_size: int, stride: int
+    ) -> np.ndarray:
+        N, C, H, W = inputs.shape
+        out_h = (H - kernel_size) // stride + 1
+        out_w = (W - kernel_size) // stride + 1
+
+        i0 = np.repeat(np.arange(kernel_size), kernel_size)
+        i0 = np.tile(i0, C)
+        i1 = stride * np.repeat(np.arange(out_h), out_w)
+        j0 = np.tile(np.arange(kernel_size), kernel_size * C)
+        j1 = stride * np.tile(np.arange(out_w), out_h)
+        i = i0.reshape(-1, 1) + i1.reshape(1, -1)
+        j = j0.reshape(-1, 1) + j1.reshape(1, -1)
+
+        k = np.repeat(np.arange(C), kernel_size * kernel_size).reshape(-1, 1)
+
+        cols = inputs[:, k, i, j]
+        cols = cols.transpose(1, 2, 0).reshape(
+            kernel_size * kernel_size * C, -1
+        )
+        return cols
+
+    def col2im(
+        self,
+        cols: np.ndarray,
+        N: int,
+        C: int,
+        H: int,
+        W: int,
+        kernel_size: int,
+        stride: int,
+    ) -> np.ndarray:
+        H_out = (H - kernel_size) // stride + 1
+        W_out = (W - kernel_size) // stride + 1
+        cols_reshaped = cols.reshape(C * kernel_size * kernel_size, -1, N)
+        cols_reshaped = cols_reshaped.transpose(2, 0, 1)
+
+        images = np.zeros((N, C, H + stride - 1, W + stride - 1))
+        for i in range(kernel_size):
+            for j in range(kernel_size):
+                i_lim = i + stride * H_out
+                j_lim = j + stride * W_out
+
+                cols_slice = cols_reshaped[
+                    :, i * kernel_size + j :: kernel_size**2, :
                 ]
-                for k in range(self.output_dim):
-                    self.weights_grad[k, :, :, :] += np.sum(
-                        input_slice
-                        * output_grad[:, k, i, j][:, None, None, None],
-                        axis=0,
-                    )
-                    input_grad[
-                        :,
-                        :,
-                        i * self.stride : i * self.stride + self.kernel_size,
-                        j * self.stride : j * self.stride + self.kernel_size,
-                    ] += (
-                        self.weights[k, :, :, :]
-                        * output_grad[:, k, i, j][:, None, None, None]
-                    )
+                cols_slice_reshaped = cols_slice.reshape(N, 1, H_out, W_out)
 
-        return input_grad
+                images[
+                    :, :, i:i_lim:stride, j:j_lim:stride
+                ] += cols_slice_reshaped
+
+        return images[:, :, :H, :W]
 
     def serialize(self) -> dict[str, Any]:
         serialized_data = super().serialize()

@@ -13,10 +13,14 @@ class Dense(BaseLayer):
         self.inputs = None
         self.weights = self.initializer((input_dim, output_dim))
         self.bias = np.zeros(output_dim)
+
         self.weights_grad = np.zeros_like(self.weights)
         self.bias_grad = np.zeros_like(self.bias)
 
     def forward(self, inputs: np.ndarray) -> np.ndarray:
+        if inputs.ndim > 2:  # Flatten
+            inputs = inputs.reshape(inputs.shape[0], -1)
+
         self.inputs = inputs
         return np.dot(inputs, self.weights) + self.bias
 
@@ -42,16 +46,22 @@ class Dropout(BaseLayer):
     def __init__(self, rate) -> None:
         super(Dropout, self).__init__()
         self.rate = rate
+
         self.mask = None
+        self.flattened_mask = None
 
     def forward(self, inputs: np.ndarray, training: bool = True) -> np.ndarray:
         if training:
             self.mask = np.random.binomial(1, 1 - self.rate, size=inputs.shape)
+            if inputs.ndim > 2:
+                self.flattened_mask = self.mask.reshape(inputs.shape[0], -1)
             return inputs * self.mask
         else:
             return inputs * (1 - self.rate)
 
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
+        if self.flattened_mask is not None:
+            return output_grad * self.flattened_mask
         return output_grad * self.mask
 
     def serialize(self) -> dict[str, Any]:
@@ -83,16 +93,26 @@ class BatchNorm(BaseLayer):
             return (inputs - self.mean) / np.sqrt(self.variance + self.epsilon)
 
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
-        N, D = self.last_input.shape
-        inv_std = 1.0 / np.sqrt(self.variance + self.epsilon)
-        xmu = self.last_input - self.mean
-        dx_normalized = output_grad * inv_std
-        d_var = np.sum(output_grad * xmu * -0.5 * inv_std**3, axis=0)
+        if self.last_input is None:
+            raise ValueError("No forward pass data stored in BatchNorm layer.")
+
+        N, D = self.last_input.shape[0], np.prod(self.last_input.shape[1:])
+        reshaped_inputs = self.last_input.reshape(N, D)
+
+        reshaped_mean = self.mean.reshape(1, D)
+        reshaped_variance = self.variance.reshape(1, D)
+
+        # Compute gradients.
+        inv_std = 1.0 / np.sqrt(reshaped_variance + self.epsilon)
+        xmu = reshaped_inputs - reshaped_mean
+
+        dx_normalized = output_grad.reshape(N, D) * inv_std
+        d_var = np.sum(dx_normalized * xmu * -0.5 * inv_std**3, axis=0)
         d_mu = np.sum(dx_normalized * -inv_std, axis=0) + d_var * np.mean(
             -2.0 * xmu, axis=0
         )
         dx = (dx_normalized * inv_std) + (d_var * 2 * xmu / N) + (d_mu / N)
-        return dx
+        return dx.reshape(self.last_input.shape)
 
     def serialize(self) -> dict[str, Any]:
         serialized_data = super().serialize()

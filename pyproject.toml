@@ -17,6 +17,7 @@ flake8 = "^6.1.0"
 isort = "^5.13.2"
 pre-commit = "^3.6.0"
 coverage = "^7.3.3"
+scipy = "^1.11.4"
 
 
 [build-system]

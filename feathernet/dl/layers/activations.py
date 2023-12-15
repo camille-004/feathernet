@@ -32,6 +32,13 @@ class ReLU(Activation):
         return np.maximum(0, inputs)
 
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
+        if (
+            self.inputs.ndim > 2
+            and self.inputs.shape[0] == output_grad.shape[0]
+        ):
+            reshaped_inputs = self.inputs.reshape(output_grad.shape)
+            return output_grad * (reshaped_inputs > 0)
+
         return output_grad * (self.inputs > 0)
 
 
@@ -45,6 +52,13 @@ class Sigmoid(Activation):
         return self.output
 
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
+        if (
+            self.output.ndim > 2
+            and self.output.shape[0] == output_grad.shape[0]
+        ):
+            reshaped_output = self.output.reshape(output_grad.shape)
+            return output_grad * (reshaped_output * (1 - reshaped_output))
+
         return output_grad * (self.output * (1 - self.output))
 
 
@@ -60,4 +74,11 @@ class Softmax(Activation):
         return probabilities
 
     def backward(self, output_grad: np.ndarray) -> np.ndarray:
+        if (
+            self.output.ndim > 2
+            and self.output.shape[0] == output_grad.shape[0]
+        ):
+            # reshaped_output = self.output.reshape(output_grad.shape)
+            return output_grad
+
         return output_grad

@@ -1,5 +1,5 @@
-from feathernet.compiler.ir import ModelIR
 from feathernet.compiler.fusion import fuse_layers
+from feathernet.compiler.ir import ModelIR
 from feathernet.compiler.utils import can_fuse, update_edge
 
 
