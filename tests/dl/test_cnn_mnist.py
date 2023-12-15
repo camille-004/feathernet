@@ -71,11 +71,11 @@ class TestCNNMNIST(unittest.TestCase):
         model.add(Dense(128, 10))
         model.add(Softmax())
 
-        model.train(X_train, y_train, epochs=10, loss_function=CrossEntropy())
+        model.train(X_train, y_train, epochs=100, loss_function=CrossEntropy())
 
         y_pred = model.predict(X_train)
-        print(y_pred)
         acc = accuracy(y_pred, y_train)
+        print(f"Accuracy: {acc}")
         self.assertGreater(acc, 0.7)
 
 
