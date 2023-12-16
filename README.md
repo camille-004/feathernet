@@ -3,6 +3,11 @@
   <br /><br /><strong>Feathernet</strong>
 </h1>
 
+![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/camille-004/feathernet?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/camille-004/feathernet?style=social)
+![GitHub Repo stars](https://img.shields.io/github/stars/camille-004/feathernet?style=social)
+![GitHub forks](https://img.shields.io/github/forks/camille-004/feathernet?style=social)
+
 ---
 
 ## Project Status [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#status)
