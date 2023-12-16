@@ -4,6 +4,8 @@ SORT = isort
 
 SRC_DIR := feathernet/
 TEST_DIR := tests/
+DL_TESTS := $(TEST_DIR)dl/
+COMPILER_TESTS := $(TEST_DIR)compiler/
 
 .PHONY: lint format
 
@@ -19,8 +21,16 @@ format:
 	@echo "Sorting imports..."
 	$(SORT) $(SRC_DIR) $(TEST_DIR)
 
-.PHONY: test-coverage
+.PHONY: test test-dl test-compiler
 
 test:
 	@echo "Running tests with coverage..."
 	coverage run -m unittest discover -s $(TEST_DIR)
+
+test-dl:
+	@echo "Running DL with coverage..."
+	coverage run -m unittest discover -s $(DL_TESTS)
+
+test-compiler:
+	@echo "Running Compiler with coverage..."
+	coverage run -m unittest discover -s $(COMPILER_TESTS)
