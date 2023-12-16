@@ -18,6 +18,7 @@ from feathernet.dl.layers import (
 from feathernet.dl.losses import CrossEntropy
 from feathernet.dl.metrics import accuracy
 from feathernet.dl.network import Network
+from feathernet.dl.optimizers import SGD
 
 
 class TestCNNMNIST(unittest.TestCase):
@@ -75,7 +76,13 @@ class TestCNNMNIST(unittest.TestCase):
         model.add(Dense(128, 10))
         model.add(Softmax())
 
-        model.train(X_train, y_train, epochs=100, loss_function=CrossEntropy())
+        model.train(
+            X_train,
+            y_train,
+            epochs=100,
+            loss_function=CrossEntropy(),
+            optimizer=SGD(1e-4),
+        )
 
         y_pred = model.predict(X_train)
         acc = accuracy(y_pred, y_train)

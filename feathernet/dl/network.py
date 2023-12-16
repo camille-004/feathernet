@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from feathernet.dl.layers.base import BaseLayer
 from feathernet.dl.losses import Loss
-from feathernet.dl.optimizers import Optimizer, SGD
+from feathernet.dl.optimizers import SGD, Optimizer
 
 
 class Network:
@@ -40,6 +40,9 @@ class Network:
                 print(
                     f"Backward - {layer.__class__.__name__} - Output gradient shape: {output_grad.shape}"
                 )
+            if hasattr(layer, "weights"):
+                self.optimizer.update(layer.weights, layer.weights_grad)
+                self.optimizer.update(layer.bias, layer.bias_grad)
 
     def train(
         self,
@@ -71,13 +74,6 @@ class Network:
                 epoch_loss += loss
                 output_grad = loss_function.backward(output, y_batch)
                 self.backward(output_grad)
-
-                for layer in self.layers:
-                    if hasattr(layer, "weights"):
-                        self.optimizer.update(
-                            layer.weights, layer.weights_grad
-                        )
-                        self.optimizer.update(layer.bias, layer.bias_grad)
 
             avg_epoch_loss = epoch_loss / num_batches
             print(

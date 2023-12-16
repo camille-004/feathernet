@@ -94,7 +94,12 @@ class TestModelToIRConversion(unittest.TestCase):
 
     def test_conversion_with_optimizations(self) -> None:
         optimized_ir = convert_model_to_ir(
-            self.model, prune_threshold=0.01, quantize_precision=np.int8
+            self.model,
+            optimizations={
+                "fusion": {},
+                "pruning": {"threshold": 0.01},
+                "quantization": {"precision": np.int8},
+            },
         )
 
         self.assertTrue(len(optimized_ir.nodes) > 0)

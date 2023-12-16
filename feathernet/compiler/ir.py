@@ -1,12 +1,19 @@
 from feathernet.compiler.graph_opt import (
-    fuse_layers_in_model,
-    prune_model,
-    quantize_model,
+    Fusion,
+    GraphOptimizer,
+    Pruning,
+    Quantization,
 )
 from feathernet.compiler.ir_base import IRNode, ModelIR
 from feathernet.dl.network import Network
 
 __all__ = ["IRNode", "ModelIR", "create_ir_from_model", "convert_model_to_ir"]
+
+OPTIMIZERS: dict[str, type[GraphOptimizer]] = {
+    "fusion": Fusion,
+    "pruning": Pruning,
+    "quantization": Quantization,
+}
 
 
 def create_ir_from_model(model: Network) -> ModelIR:
@@ -23,10 +30,14 @@ def create_ir_from_model(model: Network) -> ModelIR:
 
 
 def convert_model_to_ir(
-    model: Network, prune_threshold: float, quantize_precision: type
+    model: Network, optimizations: [str, [dict[dict, str]]]
 ) -> ModelIR:
     model_ir = create_ir_from_model(model)
-    fuse_layers_in_model(model_ir)
-    prune_model(model_ir, prune_threshold)
-    quantize_model(model_ir, quantize_precision)
+
+    for optimizer_name, params in optimizations.items():
+        optimizer_class = OPTIMIZERS.get(optimizer_name.lower())
+        if optimizer_class:
+            optimizer = optimizer_class(**params)
+            optimizer.optimize(model_ir)
+
     return model_ir

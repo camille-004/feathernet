@@ -1,9 +1,29 @@
 import numpy as np
 
+from feathernet.compiler.graph_opt import GraphOptimizer
 from feathernet.compiler.ir_base import IRNode, ModelIR
 from feathernet.compiler.utils import can_fuse, update_edge
-from feathernet.dl.layers.convolution import Conv2D
-from feathernet.dl.layers.core import BatchNorm
+from feathernet.dl.layers import BatchNorm, Conv2D
+
+
+class Fusion(GraphOptimizer):
+    def optimize(self, model_ir: ModelIR):
+        i = 0
+        while i < len(model_ir.nodes) - 1:
+            curr_node = model_ir.nodes[i]
+            next_node = model_ir.nodes[i + 1]
+
+            if can_fuse(curr_node, next_node):
+                fused_node = fuse_layers(curr_node, next_node)
+                if fused_node is not None:
+                    fused_ir_node = IRNode(
+                        fused_node.layer_type, **fused_node.params
+                    )
+                    model_ir.nodes[i] = fused_ir_node
+                    del model_ir.nodes[i + 1]
+                    update_edge(model_ir, i)
+            else:
+                i += 1
 
 
 def fuse_layers(node1: IRNode, node2: IRNode) -> IRNode:
@@ -59,22 +79,3 @@ def fuse_dense_layers(dense_node1: IRNode, dense_node2: IRNode) -> IRNode:
         input_dim=dense_node1.params["input_dim"],
         output_dim=dense_node2.params["output_dim"],
     )
-
-
-def fuse_layers_in_model(model_ir: ModelIR) -> None:
-    i = 0
-    while i < len(model_ir.nodes) - 1:
-        curr_node = model_ir.nodes[i]
-        next_node = model_ir.nodes[i + 1]
-
-        if can_fuse(curr_node, next_node):
-            fused_node = fuse_layers(curr_node, next_node)
-            if fused_node is not None:
-                fused_ir_node = IRNode(
-                    fused_node.layer_type, **fused_node.params
-                )
-                model_ir.nodes[i] = fused_ir_node
-                del model_ir.nodes[i + 1]
-                update_edge(model_ir, i)
-        else:
-            i += 1

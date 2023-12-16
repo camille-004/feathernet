@@ -1,6 +1,5 @@
 from feathernet.compiler.ir_base import IRNode, ModelIR
 
-
 ACTIVATION_TYPES: set[str] = {"ReLU", "Sigmoid", "Softmax"}
 LAYER_TYPES: set[str] = {"Conv2D", "Dense"}
 

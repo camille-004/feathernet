@@ -1,10 +1,12 @@
-from .fusion import fuse_layers, fuse_layers_in_model
-from .pruning import prune_model
-from .quantization import quantize_model
+from .base import GraphOptimizer
+from .fusion import Fusion, fuse_layers
+from .pruning import Pruning
+from .quantization import Quantization
 
 __all__ = [
+    "GraphOptimizer",
     "fuse_layers",
-    "fuse_layers_in_model",
-    "prune_model",
-    "quantize_model",
+    "Fusion",
+    "Pruning",
+    "Quantization",
 ]
