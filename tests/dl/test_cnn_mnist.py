@@ -18,7 +18,6 @@ from feathernet.dl.layers import (
 from feathernet.dl.losses import CrossEntropy
 from feathernet.dl.metrics import accuracy
 from feathernet.dl.network import Network
-from feathernet.dl.optimizers import SGD
 
 
 class TestCNNMNIST(unittest.TestCase):
@@ -40,7 +39,7 @@ class TestCNNMNIST(unittest.TestCase):
     def test_cnn_mnist(self) -> None:
         X_train, X_test, y_train, y_test = self.load_mnist_dataset()
 
-        model = Network(SGD(learning_rate=0.0001))
+        model = Network()
         model.add(
             Conv2D(
                 input_dim=1,

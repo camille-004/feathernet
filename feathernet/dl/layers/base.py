@@ -22,7 +22,14 @@ class BaseLayer(ABC):
         raise NotImplementedError
 
     def serialize(self) -> dict[str, Any]:
-        return {"type": self.layer_type}
+        serialized_data = {"type": self.layer_type}
+
+        if hasattr(self, "weights"):
+            serialized_data["weights"] = self.weights
+        if hasattr(self, "bias"):
+            serialized_data["bias"] = self.bias
+
+        return serialized_data
 
     def _get_initializer_name(self) -> str:
         if hasattr(self.initializer, "__name__"):

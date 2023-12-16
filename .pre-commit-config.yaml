@@ -17,4 +17,4 @@ repos:
     rev: 6.1.0
     hooks:
       - id: flake8
-        args: ['--ignore=D100,D101,D102,D103,D104,D107,D202,E203,E501,W503']
+        args: ['--ignore=D100,D101,D102,D103,D104,D105,D107,D202,E203,E501,W503']

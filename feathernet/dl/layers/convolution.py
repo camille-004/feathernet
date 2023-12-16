@@ -22,6 +22,9 @@ class Conv2D(BaseLayer):
         self.stride = stride
         self.padding = padding
 
+        if initializer is not None:
+            self.initializer = initializer
+
         self.weights = self.initializer(
             (output_dim, input_dim, kernel_size, kernel_size)
         )

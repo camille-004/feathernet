@@ -3,13 +3,12 @@ import unittest
 from feathernet.dl.layers import Dense, ReLU
 from feathernet.dl.losses import CrossEntropy
 from feathernet.dl.network import Network
-from feathernet.dl.optimizers import SGD, Optimizer
 from tests.utils.dataset import make_dataset
 
 
 class TestableNetwork(Network):
-    def __init__(self, optimizer: Optimizer) -> None:
-        super(TestableNetwork, self).__init__(optimizer)
+    def __init__(self) -> None:
+        super(TestableNetwork, self).__init__()
         self.add(Dense(10, 5))
         self.add(ReLU())
         self.add(Dense(5, 2))
@@ -18,7 +17,7 @@ class TestableNetwork(Network):
 class TestSimpleNN(unittest.TestCase):
     def setUp(self) -> None:
         self.X, self.y = make_dataset()
-        self.model = TestableNetwork(SGD(learning_rate=0.01))
+        self.model = TestableNetwork()
 
     def test_forward_pass(self):
         predictions = self.model.forward(self.X)

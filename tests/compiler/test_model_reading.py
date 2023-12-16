@@ -126,7 +126,7 @@ class TestNetworkSerialization(unittest.TestCase):
         serialized_network = network.serialize()
 
         self.assertIsInstance(serialized_network, dict)
-        self.assertEqual(len(serialized_network), 2)
+        self.assertEqual(len(serialized_network["layers"]), 2)
         self.assertEqual(serialized_network["layers"][0]["type"], "Dense")
         self.assertEqual(
             serialized_network["layers"][0]["initializer"], "he_initializer"

@@ -5,14 +5,14 @@ from tqdm import tqdm
 
 from feathernet.dl.layers.base import BaseLayer
 from feathernet.dl.losses import Loss
-from feathernet.dl.optimizers import Optimizer
+from feathernet.dl.optimizers import Optimizer, SGD
 
 
 class Network:
-    def __init__(self, optimizer: Optimizer, verbose: bool = False) -> None:
+    def __init__(self, verbose: bool = False) -> None:
         self.layers = []
-        self.optimizer = optimizer
         self.verbose = verbose
+        self.optimizer = None
 
     def add(self, layer: BaseLayer) -> None:
         self.layers.append(layer)
@@ -40,9 +40,6 @@ class Network:
                 print(
                     f"Backward - {layer.__class__.__name__} - Output gradient shape: {output_grad.shape}"
                 )
-            if hasattr(layer, "weights"):
-                self.optimizer.update(layer.weights, layer.weights_grad)
-                self.optimizer.update(layer.bias, layer.bias_grad)
 
     def train(
         self,
@@ -50,8 +47,11 @@ class Network:
         y_train: np.ndarray,
         epochs: int,
         loss_function: Loss,
+        optimizer: Optimizer = SGD(0.01),
         batch_size: int = 32,
     ) -> None:
+        self.optimizer = optimizer
+
         num_samples = X_train.shape[0]
         batch_size = min(batch_size, num_samples)
         num_batches = (num_samples + batch_size - 1) // batch_size
@@ -72,6 +72,13 @@ class Network:
                 output_grad = loss_function.backward(output, y_batch)
                 self.backward(output_grad)
 
+                for layer in self.layers:
+                    if hasattr(layer, "weights"):
+                        self.optimizer.update(
+                            layer.weights, layer.weights_grad
+                        )
+                        self.optimizer.update(layer.bias, layer.bias_grad)
+
             avg_epoch_loss = epoch_loss / num_batches
             print(
                 f"Epoch {epoch + 1}/{epochs}, Avg Loss: {avg_epoch_loss:.4f}"
@@ -83,5 +90,4 @@ class Network:
     def serialize(self) -> dict[str, Any]:
         return {
             "layers": [layer.serialize() for layer in self.layers],
-            "optimizer": self.optimizer.serialize(),
         }

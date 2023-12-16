@@ -1,84 +1,12 @@
-from typing import Any
-
+from feathernet.compiler.graph_opt import (
+    fuse_layers_in_model,
+    prune_model,
+    quantize_model,
+)
+from feathernet.compiler.ir_base import IRNode, ModelIR
 from feathernet.dl.network import Network
-from feathernet.dl.optimizers import Optimizer
 
-
-class IRNode:
-    def __init__(self, layer_type: str, **params: Any) -> None:
-        self._layer_type = layer_type
-        self._params = params
-
-    @property
-    def layer_type(self) -> str:
-        return self._layer_type
-
-    @layer_type.setter
-    def layer_type(self, layer_type: str) -> None:
-        self._layer_type = layer_type
-
-    @property
-    def params(self) -> dict[str, Any]:
-        return self._params
-
-    @params.setter
-    def params(self, params: dict[str, Any]) -> None:
-        self._params = params
-
-    def serialize(self) -> dict[str, Any]:
-        return {"type": self.layer_type, "params": self.params}
-
-
-class ModelIR:
-    """Class to represent the IR.
-
-    This will hold information about layers, their types, parameters, and
-    connections.
-    """
-
-    def __init__(self) -> None:
-        self._nodes = []
-        self._edges = []
-        self._optimizer = None
-
-    @property
-    def nodes(self) -> list[IRNode]:
-        return self._nodes
-
-    @nodes.setter
-    def nodes(self, nodes: list[IRNode]) -> None:
-        self._nodes = nodes
-
-    @property
-    def edges(self) -> list[dict[str, IRNode]]:
-        return self._edges
-
-    @edges.setter
-    def edges(self, edges: list[dict[str, IRNode]]):
-        self._edges = edges
-
-    @property
-    def optimizer(self) -> Optimizer:
-        return self._optimizer
-
-    @optimizer.setter
-    def optimizer(self, optimizer: Optimizer) -> None:
-        self._optimizer = optimizer
-
-    def add_node(self, layer_type: str, **params: Any) -> None:
-        node = IRNode(layer_type, **params)
-        self.nodes.append(node)
-
-    def add_edge(self, from_node: int, to_node: int) -> None:
-        edge = {"from": from_node, "to": to_node}
-        self.edges.append(edge)
-
-    def serialize(self) -> list:
-        return {
-            "nodes": self.nodes,
-            "edges": self.edges,
-            "optimizer": self.optimizer,
-        }
+__all__ = ["IRNode", "ModelIR", "create_ir_from_model", "convert_model_to_ir"]
 
 
 def create_ir_from_model(model: Network) -> ModelIR:
@@ -91,5 +19,14 @@ def create_ir_from_model(model: Network) -> ModelIR:
         if i > 0:
             ir.add_edge(i - 1, i)
 
-    ir.optimizer = network_data["optimizer"]
     return ir
+
+
+def convert_model_to_ir(
+    model: Network, prune_threshold: float, quantize_precision: type
+) -> ModelIR:
+    model_ir = create_ir_from_model(model)
+    fuse_layers_in_model(model_ir)
+    prune_model(model_ir, prune_threshold)
+    quantize_model(model_ir, quantize_precision)
+    return model_ir

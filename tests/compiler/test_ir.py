@@ -1,9 +1,15 @@
 import unittest
 
-from feathernet.compiler.ir import IRNode, ModelIR, create_ir_from_model
-from feathernet.dl.layers import Conv2D
+import numpy as np
+
+from feathernet.compiler.ir import (
+    IRNode,
+    ModelIR,
+    convert_model_to_ir,
+    create_ir_from_model,
+)
+from feathernet.dl.layers import Conv2D, Dense
 from feathernet.dl.network import Network
-from feathernet.dl.optimizers import SGD
 
 
 class TestIRNode(unittest.TestCase):
@@ -25,7 +31,6 @@ class TestModelIR(unittest.TestCase):
         ir = ModelIR()
         self.assertEqual(ir.nodes, [])
         self.assertEqual(ir.edges, [])
-        self.assertIsNone(ir.optimizer)
 
     def test_modelir_add_node(self) -> None:
         ir = ModelIR()
@@ -40,10 +45,21 @@ class TestModelIR(unittest.TestCase):
         self.assertEqual(len(ir.edges), 1)
         self.assertEqual(ir.edges[0], {"from": 0, "to": 1})
 
+    def test_modelir_repr_formatting(self):
+        ir = ModelIR()
+        ir.add_node("Dense", input_dim=10, output_dim=5)
+        ir.add_node("ReLU")
+        ir.add_edge(0, 1)
+
+        ir_repr = repr(ir)
+        print(ir_repr)
+
+        self.assertTrue(len(ir_repr.split("\n")) > 5)
+
 
 class TestCreateIRFromModel(unittest.TestCase):
     def setUp(self) -> None:
-        self.model = Network(SGD())
+        self.model = Network()
         self.model.add(
             Conv2D(
                 input_dim=3, output_dim=16, kernel_size=3, stride=1, padding=1
@@ -64,6 +80,34 @@ class TestCreateIRFromModel(unittest.TestCase):
         self.assertEqual(ir.nodes[1].layer_type, "Conv2D")
         self.assertEqual(len(ir.edges), 1)
         self.assertEqual(ir.edges[0], {"from": 0, "to": 1})
+
+
+class TestModelToIRConversion(unittest.TestCase):
+    def setUp(self) -> None:
+        self.model = Network()
+        self.model.add(
+            Conv2D(
+                input_dim=3, output_dim=16, kernel_size=3, stride=1, padding=1
+            )
+        )
+        self.model.add(Dense(input_dim=16, output_dim=10))
+
+    def test_conversion_with_optimizations(self) -> None:
+        optimized_ir = convert_model_to_ir(
+            self.model, prune_threshold=0.01, quantize_precision=np.int8
+        )
+
+        self.assertTrue(len(optimized_ir.nodes) > 0)
+
+        for node in optimized_ir.nodes:
+            if node.layer_type == "Dense":
+                self.assertEqual(node.params["weights"].dtype, np.int8)
+
+        for node in optimized_ir.nodes:
+            if node.layer_type == "Dense":
+                pruned_weights = node.params["weights"]
+                num_zero_weights = np.count_nonzero(pruned_weights == 0)
+                self.assertGreater(num_zero_weights, 0)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from feathernet.compiler.ir import ModelIR
+from feathernet.compiler.ir_base import ModelIR
 from feathernet.dl.utils import prune_weights
 
 
