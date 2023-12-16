@@ -5,6 +5,8 @@ import numpy as np
 
 from feathernet.dl.layers.base import BaseLayer
 
+__all__ = ["Activation", "ReLU", "Sigmoid", "Softmax"]
+
 
 class Activation(BaseLayer):
     def __init__(self):

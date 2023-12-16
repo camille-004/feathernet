@@ -1,7 +1,6 @@
 import unittest
 
-from feathernet.dl.layers.activations import ReLU
-from feathernet.dl.layers.core import Dense
+from feathernet.dl.layers import Dense, ReLU
 from feathernet.dl.losses import CrossEntropy
 from feathernet.dl.network import Network
 from feathernet.dl.optimizers import SGD, Optimizer

@@ -4,6 +4,8 @@ import numpy as np
 
 from feathernet.dl.layers.base import BaseLayer
 
+__all__ = ["Dense", "BatchNorm", "Dropout"]
+
 
 class Dense(BaseLayer):
     def __init__(

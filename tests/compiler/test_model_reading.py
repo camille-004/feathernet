@@ -3,10 +3,14 @@ import unittest
 import numpy as np
 
 from feathernet.dl.initializers import he_initializer
-from feathernet.dl.layers.activations import ReLU
-from feathernet.dl.layers.convolution import Conv2D
-from feathernet.dl.layers.core import BatchNorm, Dense, Dropout
-from feathernet.dl.layers.pooling import Pooling
+from feathernet.dl.layers import (
+    BatchNorm,
+    Conv2D,
+    Dense,
+    Dropout,
+    Pooling,
+    ReLU,
+)
 from feathernet.dl.losses import CrossEntropy, MeanSquaredError
 from feathernet.dl.network import Network
 from feathernet.dl.optimizers import SGD

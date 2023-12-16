@@ -6,10 +6,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 
 from feathernet.dl.initializers import he_initializer
-from feathernet.dl.layers.activations import ReLU, Softmax
-from feathernet.dl.layers.convolution import Conv2D
-from feathernet.dl.layers.core import BatchNorm, Dense, Dropout
-from feathernet.dl.layers.pooling import Pooling
+from feathernet.dl.layers import (
+    BatchNorm,
+    Conv2D,
+    Dense,
+    Dropout,
+    Pooling,
+    ReLU,
+    Softmax,
+)
 from feathernet.dl.losses import CrossEntropy
 from feathernet.dl.metrics import accuracy
 from feathernet.dl.network import Network

@@ -2,9 +2,7 @@ import unittest
 
 import numpy as np
 
-from feathernet.dl.layers.convolution import Conv2D
-from feathernet.dl.layers.core import BatchNorm, Dropout
-from feathernet.dl.layers.pooling import Pooling
+from feathernet.dl.layers import BatchNorm, Conv2D, Dropout, Pooling
 
 
 class TestBatchNorm(unittest.TestCase):
