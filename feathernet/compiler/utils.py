@@ -1,8 +1,11 @@
+from feathernet.compiler.ir_base import IRNode, ModelIR
+
+
 ACTIVATION_TYPES: set[str] = {"ReLU", "Sigmoid", "Softmax"}
 LAYER_TYPES: set[str] = {"Conv2D", "Dense"}
 
 
-def can_fuse(node1, node2) -> bool:
+def can_fuse(node1: IRNode, node2: IRNode) -> bool:
     """Check if two given nodes can be fused based on predefined rules."""
     if node1.layer_type == "Conv2D" and node2.layer_type == "BatchNorm":
         return True
@@ -16,7 +19,7 @@ def can_fuse(node1, node2) -> bool:
     return False
 
 
-def update_edge(ir, fused_node_idx: int) -> None:
+def update_edge(ir: ModelIR, fused_node_idx: int) -> None:
     for edge in ir.edges:
         if edge["from"] == fused_node_idx + 1:
             edge["from"] = fused_node_idx
