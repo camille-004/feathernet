@@ -29,9 +29,9 @@
 
 ## Table of Contents [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#table-of-contents)
 
-- [Composition](#composition-)
 - [Motivation](#motivation-)
 - [From Scratch in PYthon](#from-scratch-in-python-)
+- [Composition](#composition-)
 - [Running Tests](#running-tests-)
     - [Running Tests Locally](#running-tests-locally)
     - [Running Tests in the Docker Container](#running-tests-in-the-docker-container)
@@ -59,16 +59,6 @@ Key resources for further reading on deep learning compilers:
 
 ---
 
-## Composition [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#composition)
-
-Feathernet is composed of two primary packages.
-- [`dl`](https://github.com/camille-004/feathernet/tree/main/feathernet/dl): This package encompasses core deep learning components, including layers, optimizers, initializers, and losses. Additionally, each component in the `dl` package is equipped with serialization capabilities, enabling integration with the compiler's Intermediate Representation (IR).
-- [`compiler`](https://github.com/camille-004/feathernet/tree/main/feathernet/compiler): This package offers tools and modules for graph optimization and Intermediate Representation (IR). It includes functionalities for layer fusion, pruning, and quantization.
-
-<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
-
----
-
 ## From Scratch in Python [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#from-scratch-in-python)
 
 Feathernet's journey of being developed from scratch in Python is driven by an ambition to unveil the synergy between DL libraries and compilers. This allows us to observe and understand how these two critical components of AI technology work in tandem.
@@ -79,6 +69,16 @@ Key aspects of this approach include:
 - *Practical Learning Experience*: This dual development approach grants practical insights into compiler development challenges, particularly in translating high-level neural network models into executable code.
 
 > 💡 The code in the `dl` package of the Feathernet suite is intentionally less optimized. This is because the focus is more on the compiler aspect, emphasizing and understanding compiler technologies rather than optimizing the deep learning components themselves.
+
+<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+
+---
+
+## Composition [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#composition)
+
+Feathernet is composed of two primary packages.
+- [`dl`](https://github.com/camille-004/feathernet/tree/main/feathernet/dl): This package encompasses core deep learning components, including layers, optimizers, initializers, and losses. Additionally, each component in the `dl` package is equipped with serialization capabilities, enabling integration with the compiler's Intermediate Representation (IR).
+- [`compiler`](https://github.com/camille-004/feathernet/tree/main/feathernet/compiler): This package offers tools and modules for graph optimization and Intermediate Representation (IR). It includes functionalities for layer fusion, pruning, and quantization.
 
 <div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
 
