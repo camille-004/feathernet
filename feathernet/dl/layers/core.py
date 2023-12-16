@@ -76,8 +76,8 @@ class BatchNorm(BaseLayer):
     def __init__(self, epsilon: float = 1e-5) -> None:
         super(BatchNorm, self).__init__()
         self.epsilon = epsilon
-        self.mean = None
-        self.variance = None
+        self.mean = 0.0
+        self.variance = 0.0
 
         self.last_input = None
 

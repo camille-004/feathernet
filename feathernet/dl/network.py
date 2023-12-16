@@ -68,8 +68,6 @@ class Network:
                 )
                 output = self.forward(X_batch)
                 loss = loss_function.forward(output, y_batch)
-                if loss < 1:
-                    print(output[:2], y_batch[:2])
                 epoch_loss += loss
                 output_grad = loss_function.backward(output, y_batch)
                 self.backward(output_grad)

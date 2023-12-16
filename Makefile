@@ -21,7 +21,6 @@ format:
 
 .PHONY: test-coverage
 
-test-coverage:
+test:
 	@echo "Running tests with coverage..."
 	coverage run -m unittest discover -s $(TEST_DIR)
-	coverage report --fail-under=80

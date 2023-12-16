@@ -1,17 +1,16 @@
-from typing import Any
-
-from feathernet.compiler.ir import ModelIR
+from feathernet.compiler.ir import IRNode, ModelIR
 
 ACTIVATION_TYPES: set[str] = {"ReLU", "Sigmoid", "Softmax"}
+LAYER_TYPES: set[str] = {"Conv2D", "Dense"}
 
 
-def can_fuse(node1: dict[str, Any], node2: dict[str, Any]) -> bool:
+def can_fuse(node1: IRNode, node2: IRNode) -> bool:
     """Check if two given nodes can be fused based on predefined rules."""
-    if node1["type"] == "Conv2D" and node2["type"] == "BatchNorm":
+    if node1.layer_type == "Conv2D" and node2.layer_type == "BatchNorm":
         return True
-    if (node1["type"] in ["Conv2D", "Dense"]) and node2[
-        "type"
-    ] in ACTIVATION_TYPES:
+    if (
+        node1["type"].layer_type in LAYER_TYPES
+    ) and node2.layer_type in ACTIVATION_TYPES:
         return True
     return False
 

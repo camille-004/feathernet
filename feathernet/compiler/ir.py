@@ -1,6 +1,32 @@
 from typing import Any
 
 from feathernet.dl.network import Network
+from feathernet.dl.optimizers import Optimizer
+
+
+class IRNode:
+    def __init__(self, layer_type: str, **params: Any) -> None:
+        self._layer_type = layer_type
+        self._params = params
+
+    @property
+    def layer_type(self) -> str:
+        return self._layer_type
+
+    @layer_type.setter
+    def layer_type(self, layer_type: str) -> None:
+        self._layer_type = layer_type
+
+    @property
+    def params(self) -> dict[str, Any]:
+        return self._params
+
+    @params.setter
+    def params(self, params: dict[str, Any]) -> None:
+        self._params = params
+
+    def serialize(self) -> dict[str, Any]:
+        return {"type": self.layer_type, "params": self.params}
 
 
 class ModelIR:
@@ -11,12 +37,36 @@ class ModelIR:
     """
 
     def __init__(self) -> None:
-        self.nodes = []
-        self.edges = []
-        self.optimizer = None
+        self._nodes = []
+        self._edges = []
+        self._optimizer = None
+
+    @property
+    def nodes(self) -> list[IRNode]:
+        return self._nodes
+
+    @nodes.setter
+    def nodes(self, nodes: list[IRNode]) -> None:
+        self._nodes = nodes
+
+    @property
+    def edges(self) -> list[dict[str, IRNode]]:
+        return self._edges
+
+    @edges.setter
+    def edges(self, edges: list[dict[str, IRNode]]):
+        self._edges = edges
+
+    @property
+    def optimizer(self) -> Optimizer:
+        return self._optimizer
+
+    @optimizer.setter
+    def optimizer(self, optimizer: Optimizer) -> None:
+        self._optimizer = optimizer
 
     def add_node(self, layer_type: str, **params: Any) -> None:
-        node = {"type": layer_type, "params": params}
+        node = IRNode(layer_type, **params)
         self.nodes.append(node)
 
     def add_edge(self, from_node: int, to_node: int) -> None:
