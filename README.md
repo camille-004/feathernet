@@ -40,14 +40,14 @@
 
 ## Motivation [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#motivation)
 
-Deep learning compilers translate high-level neural network models into optimized, hardware-specific code, bridging the gap between theoretical model design and practical application.
+Deep learning compilers translate high-level neural network models into optimized, hardware-specific code, bridging the gap between theoretical model design and practical application. Examples of prominent deep learning compilers include [TensorRT](https://developer.nvidia.com/tensorrt) (inference optimization), [XLA (*Accelerated Linear Algebra*)](https://www.tensorflow.org/xla), and [Glow](#https://ai.meta.com/tools/glow/).
 
 <div align="center"><img src="assets/imgs/dl_compiler.png" alt="Deep Learning Compiler Framework" style="width:40%;height:40%"/></div>
 
 The venture into deep learning compilers is driven by the need to:
-- **Enhance Computational Efficiency**: Optimizing neural network models for specific hardware accelerates performance and reduces resource consumption.
-- **Facilitate Cross-Platform Compatibility**: Compilers enable models to run seamlessly across different types of hardware.
-- **Democratize AI Development**: By simplifying the process of model optimization, compilers make AI development more accessible to a broader range of developers and researchers.
+- *Enhance Computational Efficiency*: Optimizing neural network models for specific hardware accelerates performance and reduces resource consumption.
+- *Facilitate Cross-Platform Compatibility*: Compilers enable models to run seamlessly across different types of hardware.
+- *Democratize AI Development*: By simplifying the process of model optimization, compilers make AI development more accessible to a broader range of developers and researchers.
 
 Feathernet aims to provide an intuitive understanding of these concepts through its `compiler` package, offering tools for graph optimization and IRs.
 
@@ -74,9 +74,9 @@ Feathernet is composed of two primary packages.
 Feathernet's journey of being developed from scratch in Python is driven by an ambition to unveil the synergy between DL libraries and compilers. This allows us to observe and understand how these two critical components of AI technology work in tandem.
 
 Key aspects of this approach include:
-- **Integrated Development**: Simultaneously crafting a deep learning library and a compiler reveals the intricate interplay between model creation and optimization. It provides a holistic view of how neural networks are translated into efficient, executable code.
-- **Focus on CPU as Target**: While the deep learning field often focuses on GPU optimizations, Feathernet places its emphasis on CPU capabilities. This choice offers insides into how compilers optimize for different hardware architectures, particulraly the more universally accessible CPUs.
-- **Practical Learning Experience**: This dual development approach grants practical insights into compiler development challenges, particularly in translating high-level neural network models into executable code.
+- *Integrated Development*: Simultaneously crafting a deep learning library and a compiler reveals the intricate interplay between model creation and optimization. It provides a holistic view of how neural networks are translated into efficient, executable code.
+- *Focus on CPU as Target*: While the deep learning field often focuses on GPU optimizations, Feathernet places its emphasis on CPU capabilities. This choice offers insides into how compilers optimize for different hardware architectures, particulraly the more universally accessible CPUs.
+- *Practical Learning Experience*: This dual development approach grants practical insights into compiler development challenges, particularly in translating high-level neural network models into executable code.
 
 > 💡 The code in the `dl` package of the Feathernet suite is intentionally less optimized. This is because the focus is more on the compiler aspect, emphasizing and understanding compiler technologies rather than optimizing the deep learning components themselves.
 
