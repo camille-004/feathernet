@@ -45,8 +45,15 @@ jobs:
         run: |
           coverage run --rcfile=.coveragerc_compiler -m unittest discover tests.compiler
           coverage report --fail-under 80
+          coverage xml
 
       - name: Run DL tests
         run: |
           coverage run --rcfile=.coveragerc_dl -m unittest discover tests.dl
           coverage report --fail-under 80
+          coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
