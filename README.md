@@ -42,7 +42,7 @@
 
 Deep learning compilers translate high-level neural network models into optimized, hardware-specific code, bridging the gap between theoretical model design and practical application.
 
-<div align="center"><img src="assets/imgs/dl_compiler.png" alt="Deep Learning Compiler Framework" style="width:70%;height:70%"/></div>
+<div align="center"><img src="assets/imgs/dl_compiler.png" alt="Deep Learning Compiler Framework" style="width:40%;height:40%"/></div>
 
 The venture into deep learning compilers is driven by the need to:
 - **Enhance Computational Efficiency**: Optimizing neural network models for specific hardware accelerates performance and reduces resource consumption.
