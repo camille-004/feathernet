@@ -29,18 +29,56 @@
 
 ## Table of Contents [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#table-of-contents)
 
-- [Composition](#composition)
+- [Composition](#composition-)
+- [Motivation](#motivation-)
+- [From Scratch in PYthon](#from-scratch-in-python-)
 - [Running Tests](#running-tests-)
     - [Running Tests Locally](#running-tests-locally)
     - [Running Tests in the Docker Container](#running-tests-in-the-docker-container)
 
 ---
 
-## Composition[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#composition)
+## Motivation [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#motivation)
+
+Deep learning compilers translate high-level neural network models into optimized, hardware-specific code, bridging the gap between theoretical model design and practical application.
+
+<div align="center"><img src="assets/imgs/dl_compiler.png" alt="Deep Learning Compiler Framework" style="width:70%;height:70%"/></div>
+
+The venture into deep learning compilers is driven by the need to:
+- **Enhance Computational Efficiency**: Optimizing neural network models for specific hardware accelerates performance and reduces resource consumption.
+- **Facilitate Cross-Platform Compatibility**: Compilers enable models to run seamlessly across different types of hardware.
+- **Democratize AI Development**: By simplifying the process of model optimization, compilers make AI development more accessible to a broader range of developers and researchers.
+
+Feathernet aims to provide an intuitive understanding of these concepts through its `compiler` package, offering tools for graph optimization and IRs.
+
+Key resources for further reading on deep learning compilers:
+- [AI Compilers Demystified](https://medium.com/geekculture/ai-compilers-ae28afbc4907)
+- [A friendly introduction to machine learning compilers and optimizers](https://huyenchip.com/2021/09/07/a-friendly-introduction-to-machine-learning-compilers-and-optimizers.html)
+
+<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+
+---
+
+## Composition [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#composition)
 
 Feathernet is composed of two primary packages.
 - [`dl`](https://github.com/camille-004/feathernet/tree/main/feathernet/dl): This package encompasses core deep learning components, including layers, optimizers, initializers, and losses. Additionally, each component in the `dl` package is equipped with serialization capabilities, enabling integration with the compiler's Intermediate Representation (IR).
 - [`compiler`](https://github.com/camille-004/feathernet/tree/main/feathernet/compiler): This package offers tools and modules for graph optimization and Intermediate Representation (IR). It includes functionalities for layer fusion, pruning, and quantization.
+
+<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+
+---
+
+## From Scratch in Python [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#from-scratch-in-python)
+
+Feathernet's journey of being developed from scratch in Python is driven by an ambition to unveil the synergy between DL libraries and compilers. This allows us to observe and understand how these two critical components of AI technology work in tandem.
+
+Key aspects of this approach include:
+- **Integrated Development**: Simultaneously crafting a deep learning library and a compiler reveals the intricate interplay between model creation and optimization. It provides a holistic view of how neural networks are translated into efficient, executable code.
+- **Focus on CPU as Target**: While the deep learning field often focuses on GPU optimizations, Feathernet places its emphasis on CPU capabilities. This choice offers insides into how compilers optimize for different hardware architectures, particulraly the more universally accessible CPUs.
+- **Practical Learning Experience**: This dual development approach grants practical insights into compiler development challenges, particularly in translating high-level neural network models into executable code.
+
+> 💡 The code in the `dl` package of the Feathernet suite is intentionally less optimized. This is because the focus is more on the compiler aspect, emphasizing and understanding compiler technologies rather than optimizing the deep learning components themselves.
 
 <div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
 
