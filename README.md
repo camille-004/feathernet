@@ -10,7 +10,7 @@
 
 ---
 
-## Project Status [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#status)
+## Project Status [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#project-status)
 
 <table class="no-border">
   <tr>
@@ -27,6 +27,25 @@
 
 ---
 
+## Table of Contents [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#table-of-contents)
+
+- [Composition](#composition)
+- [Running Tests](#running-tests-)
+    - [Running Tests Locally](#running-tests-locally)
+    - [Running Tests in the Docker Container](#running-tests-in-the-docker-container)
+
+---
+
+## Composition[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#composition)
+
+Feathernet is composed of two primary packages.
+- [`dl`](https://github.com/camille-004/feathernet/tree/main/feathernet/dl): This package encompasses core deep learning components, including layers, optimizers, initializers, and losses. Additionally, each component in the `dl` package is equipped with serialization capabilities, enabling integration with the compiler's Intermediate Representation (IR).
+- [`compiler`](https://github.com/camille-004/feathernet/tree/main/feathernet/compiler): This package offers tools and modules for graph optimization and Intermediate Representation (IR). It includes functionalities for layer fusion, pruning, and quantization.
+
+<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+
+---
+
 ## Running Tests [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#run-tests)
 
 To ensure the highest quality and reliability of the code, Feathernet includes a comprehensive suite of unit tests.
@@ -37,6 +56,11 @@ Reflecting its dual-package structure, the tests in Feathernet are divided into 
 
 ### Running Tests Locally
 
+| **Prerequisite** | **Installation** |
+| --- | ---|
+| `make` | [GNU Make](https://www.gnu.org/software/make/) |
+| `poetry` | [Poetry](https://python-poetry.org/docs/#installation) |
+
 To run Feathernet on your local machine, follow these steps:
 
 1. **Clone the Repository**:
@@ -45,19 +69,17 @@ To run Feathernet on your local machine, follow these steps:
     git clone https://github.com/camille-004/feathernet.git
     cd feathernet
     ```
-2. **Install Poetry**:
-    If Poetry is not already installed, you can install it by following the instructions [here](https://python-poetry.org/docs/#installing-with-pipx).
-3. **Install Dependencies**:
+2. **Install Dependencies**:
     Use Poetry to install the project dependencies.
     ```bash
     poetry install
     ```
-4. **Activate a Virtual Environment**:
+3. **Activate a Virtual Environment**:
     Activate the Poetry-created virtual environment for the project:
     ```
     poetry shell
     ```
-5. **Run Tests**:
+4. **Run Tests**:
     - **Run All Tests**: To run all tests (both `dl` and `compiler`), use the command:
       ```bash
       make test
@@ -90,3 +112,5 @@ Feathernet is available as a Docker container. You can pull the latest Featherne
     ```
 4. **Exit the Container**:
     Type `exit` to leave the container.
+
+<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
