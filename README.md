@@ -40,7 +40,7 @@
 
 ## Motivation [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#motivation)
 
-Deep learning compilers translate high-level neural network models into optimized, hardware-specific code, bridging the gap between theoretical model design and practical application. Examples of prominent deep learning compilers include [TensorRT](https://developer.nvidia.com/tensorrt) (inference optimization), [XLA (*Accelerated Linear Algebra*)](https://www.tensorflow.org/xla), and [Glow](#https://ai.meta.com/tools/glow/).
+Deep learning compilers translate high-level neural network models into optimized, hardware-specific code, bridging the gap between theoretical model design and practical application. Examples of prominent deep learning compilers include [TensorRT](https://developer.nvidia.com/tensorrt) (inference optimization), [XLA (*Accelerated Linear Algebra*)](https://www.tensorflow.org/xla), and [Glow](https://ai.meta.com/tools/glow/).
 
 <div align="center"><img src="assets/imgs/dl_compiler.png" alt="Deep Learning Compiler Framework" style="width:40%;height:40%"/></div>
 
