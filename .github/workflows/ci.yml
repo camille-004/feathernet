@@ -44,16 +44,22 @@ jobs:
       - name: Run compiler tests
         run: |
           coverage run --rcfile=.coveragerc_compiler -m unittest discover tests.compiler
-          coverage report --fail-under 80
-          coverage xml
+          coverage xml -o coverage-compiler.xml
 
       - name: Run DL tests
         run: |
           coverage run --rcfile=.coveragerc_dl -m unittest discover tests.dl
+          coverage xml -o coverage-dl.xml
+
+      - name: Combine coverage reports
+        run: |
+          coverage combine --append coverage-compiler.xml coverage-dl.xml
+          coverage xml -o coverage-combined.xml
           coverage report --fail-under 80
-          coverage xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          file: coverage_combined.xml
