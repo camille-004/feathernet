@@ -10,7 +10,7 @@
 
 ---
 
-## Project Status [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#project-status)
+## Project Status[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#project-status)
 
 <table class="no-border">
   <tr>
@@ -21,13 +21,13 @@
 
 ---
 
-## Introduction [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#introduction)
+## Introduction[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#introduction)
 
 **Feathernet** is a lightweight deep learning and compiler suite. Aptly named for its light-as-a-feather footprint, Feathernet is specifically crafted for those keen on exploring the realms of deep learning and compiler technology. The `dl` package encompasses essential deep learning components, enabling users to effortlessly build, train, and evaluate basic neural network models. The `compiler` package offers tools for graph optimization and Intermediate Representations (IR), positioning itself as a potential resource for understanding and implementing advanced model optimization techniques.
 
 ---
 
-## Table of Contents [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#table-of-contents)
+## Table of Contents[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#table-of-contents)
 
 - [Motivation](#motivation-)
 - [From Scratch in PYthon](#from-scratch-in-python-)
@@ -38,7 +38,7 @@
 
 ---
 
-## Motivation [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#motivation)
+## Motivation[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#motivation)
 
 Deep learning compilers translate high-level neural network models into optimized, hardware-specific code, bridging the gap between theoretical model design and practical application. Examples of prominent deep learning compilers include [TensorRT](https://developer.nvidia.com/tensorrt) (inference optimization), [XLA (*Accelerated Linear Algebra*)](https://www.tensorflow.org/xla), and [Glow](https://ai.meta.com/tools/glow/).
 
@@ -59,7 +59,7 @@ Key resources for further reading on deep learning compilers:
 
 ---
 
-## From Scratch in Python [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#from-scratch-in-python)
+## From Scratch in Python[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#from-scratch-in-python)
 
 Feathernet's journey of being developed from scratch in Python is driven by an ambition to unveil the synergy between DL libraries and compilers. This allows us to observe and understand how these two critical components of AI technology work in tandem.
 
@@ -74,7 +74,7 @@ Key aspects of this approach include:
 
 ---
 
-## Composition [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#composition)
+## Composition[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#composition)
 
 Feathernet is composed of two primary packages.
 - [`dl`](https://github.com/camille-004/feathernet/tree/main/feathernet/dl): This package encompasses core deep learning components, including layers, optimizers, initializers, and losses. Additionally, each component in the `dl` package is equipped with serialization capabilities, enabling integration with the compiler's Intermediate Representation (IR).
@@ -84,7 +84,7 @@ Feathernet is composed of two primary packages.
 
 ---
 
-## Running Tests [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#run-tests)
+## Running Tests[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#run-tests)
 
 To ensure the highest quality and reliability of the code, Feathernet includes a comprehensive suite of unit tests.
 
