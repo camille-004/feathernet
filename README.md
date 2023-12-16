@@ -19,7 +19,7 @@ Reflecting its dual-package structure, the tests in Feathernet are divided into 
 - Tests for the `dl` package cover deep learning components.
 - Tests for the `compiler` package focus on DL compiler components like graph optimization and IR.
 
-### Running Feathernet Tests Locally
+### Running Tests Locally
 
 To run Feathernet on your local machine, follow these steps:
 
@@ -46,3 +46,31 @@ To run Feathernet on your local machine, follow these steps:
       ```bash
       make test
       ```
+    - **Run DL Tests Only**: To run only the deep learning tests, use:
+      ```bash
+      make test-dl
+      ```
+    - **Run Compiler Tests Only**: To run only compiler tests, use:
+      ```bash
+      make test-compiler
+      ```
+
+### Running Tests in the Docker Container
+
+Feathernet is available as a Docker container. You can pull the latest Feathernet Docker container from GitHub Container Registry.
+
+1.  **Pull the Docker Image**:
+    ```bash
+    docker pull ghcr.io/camille-004/feathernet:latest
+    ```
+2. **Run the Docker Container**:
+    Start a container from the image. This will open an interactive shell:
+    ```bash
+    docker run -it --rm ghcr.io/camille-004/feathernet:latest /bin/bash
+   ```
+3. **Execute the Commands Inside the Container**:
+    ```bash
+   make test
+    ```
+4. **Exit the Container**:
+    Type `exit` to leave the container.
