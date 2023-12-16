@@ -5,6 +5,17 @@
 
 ---
 
+## Project Status [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#status)
+
+<table class="no-border">
+  <tr>
+    <td><img alt="Codecov" src="https://img.shields.io/codecov/c/github/camille-004/feathernet?style=for-the-badge"></td>
+    <td><img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/camille-004/feathernet/ci.yml?style=for-the-badge"></td>
+    <td><img alt="GitHub top language" src="https://img.shields.io/github/languages/top/camille-004/feathernet?style=for-the-badge"></td>
+</table>
+
+---
+
 ## Introduction [![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#introduction)
 
 **Feathernet** is a lightweight deep learning and compiler suite. Aptly named for its light-as-a-feather footprint, Feathernet is specifically crafted for those keen on exploring the realms of deep learning and compiler technology. The `dl` package encompasses essential deep learning components, enabling users to effortlessly build, train, and evaluate basic neural network models. The `compiler` package offers tools for graph optimization and Intermediate Representations (IR), positioning itself as a potential resource for understanding and implementing advanced model optimization techniques.

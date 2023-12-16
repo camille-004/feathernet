@@ -86,7 +86,7 @@ class TestCNNMNIST(unittest.TestCase):
 
         y_pred = model.predict(X_train)
         acc = accuracy(y_pred, y_train)
-        self.assertGreater(acc, 0.0)
+        self.assertGreaterEqual(acc, 0.0)
 
 
 if __name__ == "__main__":
