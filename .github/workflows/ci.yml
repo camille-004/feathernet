@@ -52,7 +52,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          file: coverage_compiler.xml
+          file: coverage-compiler.xml
           flags: compiler
 
       - name: Run DL tests
@@ -61,10 +61,10 @@ jobs:
           coverage xml -o coverage-dl.xml
           coverage report --fail-under 80
 
-      - name: Upload compiler coverage to Codecov
+      - name: Upload DL coverage to Codecov
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          file: coverage_dl.xml
+          file: coverage-dl.xml
           flags: dl
