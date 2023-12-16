@@ -30,7 +30,7 @@
 ## Table of Contents[![](https://raw.githubusercontent.com/aregtech/areg-sdk/master/docs/img/pin.svg)](#table-of-contents)
 
 - [Motivation](#motivation-)
-- [From Scratch in PYthon](#from-scratch-in-python-)
+- [From Scratch in Python](#from-scratch-in-python-)
 - [Composition](#composition-)
 - [Running Tests](#running-tests-)
     - [Running Tests Locally](#running-tests-locally)
