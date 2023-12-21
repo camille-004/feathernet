@@ -18,3 +18,12 @@ repos:
     hooks:
       - id: flake8
         args: ['--ignore=D100,D101,D102,D103,D104,D105,D107,D202,E203,E501,W503']
+
+  - repo: local
+    hooks:
+      - id: clang-format
+        name: clang-format
+        entry: clang-format -i
+        language: system
+        types: [c++, c]
+        files: \.(cpp|hpp|cc|h|cxx)$
