@@ -2,7 +2,13 @@ import unittest
 
 import numpy as np
 
-from feathernet.compiler.graph_opt import Fusion, Pruning, Quantization
+from feathernet.compiler.graph_opt import (
+    Fusion,
+    Pruning,
+    Quantization,
+    can_fuse,
+    update_edge,
+)
 from feathernet.compiler.ir import IRNode, ModelIR
 from feathernet.dl.layers import Dense
 
@@ -45,6 +51,41 @@ class TestLayerFusion(unittest.TestCase):
         self.assertEqual(model_ir.nodes[0].layer_type, "Dense")
         self.assertEqual(model_ir.nodes[0].params["input_dim"], input_dim)
         self.assertEqual(model_ir.nodes[0].params["output_dim"], output_dim)
+
+
+class TestFusionFunctions(unittest.TestCase):
+    def test_can_fuse_conv2d_batchnorm(self) -> None:
+        conv2d_node = IRNode("Conv2D")
+        bn_node = IRNode("BatchNorm")
+        self.assertTrue(can_fuse(conv2d_node, bn_node))
+
+    def test_can_fuse_layer_activation(self) -> None:
+        conv2d_node = IRNode("Conv2D")
+        activation_node = IRNode("ReLU")
+        self.assertTrue(can_fuse(conv2d_node, activation_node))
+
+    def test_can_fuse_dense_dense(self) -> None:
+        dense_node1 = IRNode("Dense", input_dim=4, output_dim=2)
+        dense_node2 = IRNode("Dense", input_dim=2, output_dim=4)
+        self.assertTrue(can_fuse(dense_node1, dense_node2))
+
+    def test_cannot_fuse_different_layer_types(self) -> None:
+        conv2d_node = IRNode("Conv2D")
+        dense_node = IRNode("Dense")
+        self.assertFalse(can_fuse(conv2d_node, dense_node))
+
+    def test_update_edge(self) -> None:
+        ir = ModelIR()
+        ir.add_edge(0, 1)
+        ir.add_edge(1, 2)
+        ir.add_edge(2, 3)
+
+        update_edge(ir, 1)
+
+        expected_edges = [{"from": 0, "to": 1}, {"from": 1, "to": 3}]
+        updated_edges = ir.edges
+
+        self.assertEqual(expected_edges, updated_edges)
 
 
 class TestPruning(unittest.TestCase):
