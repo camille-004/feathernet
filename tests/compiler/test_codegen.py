@@ -1,5 +1,4 @@
 import unittest
-from pathlib import Path
 
 from feathernet.compiler.codegen import CodeGen, Executor
 from feathernet.compiler.ir import IRNode
@@ -17,32 +16,42 @@ class TestCodeGen(unittest.TestCase):
         codegen = CodeGen(self.dense_node)
         generated_code = codegen.generate()
 
-        self.assertIn("@WEIGHTS @", generated_code)
-        self.assertIn("@BIASES @", generated_code)
+        self.assertIn(
+            "denseLayer(input, output, weights, bias);", generated_code
+        )
+
+        self.assertNotIn("@INPUT_DIM @", generated_code)
+        self.assertNotIn("@OUTPUT_DIM @", generated_code)
+        self.assertNotIn("@WEIGHTS @", generated_code)
+        self.assertNotIn("@BIASES @", generated_code)
 
 
 class TestExecutor(unittest.TestCase):
     def setUp(self) -> None:
-        input_dim, output_dim = 4, 2
-        dense_layer = Dense(input_dim, output_dim)
+        self.input_dim, self.output_dim = 4, 2
+        dense_layer = Dense(self.input_dim, self.output_dim)
         dense_params = dense_layer.serialize()
         dense_node = IRNode("Dense", **dense_params)
 
         self.codegen = CodeGen(dense_node)
-        self.cpp_source = Path("generated_dense.cpp")
-        self.binary_path = Path("dense_executable")
 
     def test_compile_and_execute(self):
         generated_code = self.codegen.generate()
+        executor = Executor(generated_code)
 
-        with open(self.cpp_source, "w") as f:
-            f.write(generated_code)
+        if not executor.compile():
+            self.fail("Compilation failed.")
 
-        executor = Executor(self.cpp_source)
-
-        executor.compile()
         output = executor.exec()
-        print(output)
+        executor.cleanup()
+
+        try:
+            output_values = [float(value) for value in output.strip().split()]
+        except ValueError:
+            self.fail("Output values are not valid floats.")
+
+        self.assertEqual(len(output_values), self.output_dim)
+        self.assertIsInstance(output_values, list)
 
 
 if __name__ == "__main__":

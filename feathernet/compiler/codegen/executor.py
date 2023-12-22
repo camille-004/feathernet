@@ -1,20 +1,42 @@
+import shutil
 import subprocess
-import uuid
+import tempfile
 from pathlib import Path
 
 
 class Executor:
-    def __init__(self, source: Path) -> None:
+    def __init__(self, source: str) -> None:
+        self.temp_dir = None
         self.source = source
-        self.binary_path = source.parent / f"executable_{uuid.uuid4()}"
+        self.binary_path = None
+        self.source_path = None
 
-    def compile(self) -> None:
-        cmd = f"g++ -o {self.binary_path} {self.source}"
-        subprocess.run(cmd, check=True, shell=True)
-        subprocess.run(f"chmod +x {self.binary_path}", shell=True)
+    def compile(self) -> bool:
+        # Write code and executable in memory.
+        self.temp_dir = tempfile.mkdtemp()
+        self.source_path = Path(self.temp_dir) / "source.cpp"
+        with self.source_path.open("w") as source_file:
+            source_file.write(str(self.source))
+
+        self.binary_path = Path(self.temp_dir) / "executable"
+        cmd = f"g++ -o {self.binary_path} {self.source_path}"
+        try:
+            subprocess.run(cmd, check=True, shell=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Compilation failed: {e}")
+            return False
+        return True
 
     def exec(self) -> str:
-        result = subprocess.run(
-            self.binary_path, capture_output=True, text=True
-        )
+        if self.binary_path is None:
+            raise ValueError(
+                "Compilation must be successful before executing."
+            )
+
+        cmd = str(self.binary_path.resolve())
+        result = subprocess.run(cmd, capture_output=True, text=True)
         return result.stdout
+
+    def cleanup(self) -> None:
+        if self.temp_dir is not None:
+            shutil.rmtree(self.temp_dir)

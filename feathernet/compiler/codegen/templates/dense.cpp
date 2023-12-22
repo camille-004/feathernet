@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 #include <vector>
 
 void denseLayer(const std::vector<float> &input, std::vector<float> &output,
@@ -21,14 +22,23 @@ void denseLayer(const std::vector<float> &input, std::vector<float> &output,
   }
 }
 
-std::vector<float> weights = @WEIGHTS @;
-std::vector<float> bias = @BIASES @;
-
 int main() {
-  std::vector<float> input = {};
-  std::vector<float> output;
+  const int input_dim = @INPUT_DIM @;
+  const int output_dim = @OUTPUT_DIM @;
+
+  std::vector<float> input(input_dim, 1.0f);
+
+  std::vector<float> weights = @WEIGHTS @;
+  std::vector<float> bias = @BIASES @;
+
+  std::vector<float> output(output_dim);
 
   denseLayer(input, output, weights, bias);
+
+  for (int i = 0; i < output_dim; ++i) {
+    std::cout << output[i] << " ";
+  }
+  std::cout << std::endl;
 
   return 0;
 }
