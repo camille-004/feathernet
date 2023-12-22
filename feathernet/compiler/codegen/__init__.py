@@ -1,4 +1,4 @@
-from .codegen import CodeGen
+from .codegen import LayerCodeGen, NetworkCodeGen
 from .executor import Executor
 
-__all__ = ["CodeGen", "Executor"]
+__all__ = ["LayerCodeGen", "NetworkCodeGen", "Executor"]

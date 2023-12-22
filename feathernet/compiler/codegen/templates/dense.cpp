@@ -1,10 +1,6 @@
-#include <cassert>
-#include <iostream>
-#include <vector>
-
-void denseLayer(const std::vector<float> &input, std::vector<float> &output,
-                const std::vector<float> &weights,
-                const std::vector<float> &bias) {
+void layerFunction(const std::vector<float> &input, std::vector<float> &output,
+                   const std::vector<float> &weights,
+                   const std::vector<float> &bias) {
   const int input_dim = @INPUT_DIM @;
   const int output_dim = @OUTPUT_DIM @;
 
@@ -20,25 +16,4 @@ void denseLayer(const std::vector<float> &input, std::vector<float> &output,
     }
     output[i] += bias[i];
   }
-}
-
-int main() {
-  const int input_dim = @INPUT_DIM @;
-  const int output_dim = @OUTPUT_DIM @;
-
-  std::vector<float> input(input_dim, 1.0f);
-
-  std::vector<float> weights = @WEIGHTS @;
-  std::vector<float> bias = @BIASES @;
-
-  std::vector<float> output(output_dim);
-
-  denseLayer(input, output, weights, bias);
-
-  for (int i = 0; i < output_dim; ++i) {
-    std::cout << output[i] << " ";
-  }
-  std::cout << std::endl;
-
-  return 0;
 }

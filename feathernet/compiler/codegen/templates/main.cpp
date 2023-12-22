@@ -1,0 +1,9 @@
+int main() {
+  @NETWORK_INITIALIZATION @
+
+  @NETWORK_EXECUTION @
+
+  @FINAL_OUTPUT_HANDLING @
+
+  return 0;
+}

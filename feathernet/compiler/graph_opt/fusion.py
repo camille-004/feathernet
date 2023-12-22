@@ -4,7 +4,6 @@ from feathernet.compiler.graph_opt import GraphOptimizer
 from feathernet.compiler.ir_base import IRNode, ModelIR
 from feathernet.dl.layers import BatchNorm, Conv2D
 
-
 ACTIVATION_TYPES: set[str] = {"ReLU", "Sigmoid", "Softmax"}
 LAYER_TYPES: set[str] = {"Conv2D", "Dense"}
 
