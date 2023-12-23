@@ -6,8 +6,8 @@ from pathlib import Path
 
 class Executor:
     def __init__(self, source: str) -> None:
-        self.temp_dir = None
         self.source = source
+        self.temp_dir = None
         self.binary_path = None
         self.source_path = None
 

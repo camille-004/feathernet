@@ -1,8 +1,8 @@
 import unittest
 
+from feathernet.dl import Network
 from feathernet.dl.layers import Dense, ReLU
 from feathernet.dl.losses import CrossEntropy
-from feathernet.dl.network import Network
 from tests.utils.dataset import make_dataset
 
 

@@ -5,6 +5,7 @@ from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 
+from feathernet.dl import Network
 from feathernet.dl.initializers import he_initializer
 from feathernet.dl.layers import (
     BatchNorm,
@@ -17,7 +18,6 @@ from feathernet.dl.layers import (
 )
 from feathernet.dl.losses import CrossEntropy
 from feathernet.dl.metrics import accuracy
-from feathernet.dl.network import Network
 from feathernet.dl.optimizers import SGD
 
 

@@ -251,7 +251,7 @@ class NetworkCodeGen:
         training_template = self._replace_placeholder(
             training_template,
             "NUM_BATCHES",
-            str(training_params.get("num_batches", 1)),
+            str(training_params.get("num_batches", 5)),
         )
 
         optimizer_updates = []

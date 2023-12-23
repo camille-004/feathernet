@@ -5,7 +5,7 @@ from feathernet.compiler.graph_opt import (
     Quantization,
 )
 from feathernet.compiler.ir_base import IRNode, ModelIR
-from feathernet.dl.network import Network
+from feathernet.dl import Network
 
 __all__ = ["IRNode", "ModelIR", "create_ir_from_model", "convert_model_to_ir"]
 

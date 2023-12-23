@@ -8,8 +8,8 @@ from feathernet.compiler.ir import (
     convert_model_to_ir,
     create_ir_from_model,
 )
+from feathernet.dl import Network
 from feathernet.dl.layers import Conv2D, Dense
-from feathernet.dl.network import Network
 
 
 class TestIRNode(unittest.TestCase):

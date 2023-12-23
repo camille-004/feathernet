@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 
+from feathernet.dl import Network
 from feathernet.dl.initializers import he_initializer
 from feathernet.dl.layers import (
     BatchNorm,
@@ -12,7 +13,6 @@ from feathernet.dl.layers import (
     ReLU,
 )
 from feathernet.dl.losses import CrossEntropy, MeanSquaredError
-from feathernet.dl.network import Network
 from feathernet.dl.optimizers import SGD
 
 
