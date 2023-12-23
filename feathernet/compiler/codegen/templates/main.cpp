@@ -1,11 +1,11 @@
 int main() {
   @NETWORK_INITIALIZATION @
 
-  @FORWARD_PASS @
+      @FORWARD_PASS @
 
-  @BACKWARD_PASS @
+      @BACKWARD_PASS @
 
-  @FINAL_OUTPUT_HANDLING @
+      @FINAL_OUTPUT_HANDLING @
 
-  return 0;
+      return 0;
 }

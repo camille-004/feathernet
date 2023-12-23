@@ -6,37 +6,44 @@ import numpy as np
 
 from feathernet.compiler.codegen.utils import np_to_cpp_array
 from feathernet.compiler.ir_base import IRNode, ModelIR
+from feathernet.dl.optimizers import Optimizer
 
 
 class LayerCodeGen:
+    """Generate code for individual layers."""
+
     def __init__(self, ir_node: IRNode) -> None:
         self.ir_node = ir_node
-        self._load_template()
+        self.template = self._load_template()
 
-    def _load_template(self) -> None:
+    def _load_template(self) -> str:
         with resources.path(
-            __package__ + ".templates",
+            __package__ + ".templates.layers",
             f"{self.ir_node.layer_type.lower()}.cpp",
         ) as template_path:
-            self.template_path = str(template_path)
+            template_path = str(template_path)
 
-    def generate_layer_code(self, layer_name) -> str:
-        with open(self.template_path, "r") as f:
+        with open(template_path, "r") as f:
             template = f.read()
 
-        placeholders = re.findall(r"@([A-Z_]+) @", template)
+        return template
+
+    def generate_layer_code(self, layer_name) -> str:
+        placeholders = re.findall(r"@([A-Z_]+) @", self.template)
 
         for placeholder in placeholders:
             param_name = placeholder.lower()
             value = self.ir_node.params.get(param_name)
 
-            formatted_value = self._format_param(value)
-            template = template.replace(f"@{placeholder} @", formatted_value)
+            formatted_val = self._format_param(value)
+            self.template = self.template.replace(
+                f"@{placeholder} @", formatted_val
+            )
 
-        template = template.replace(
+        self.template = self.template.replace(
             "layerFunction", f"layerFunction_{layer_name}"
         )
-        return template
+        return self.template
 
     def _format_param(self, param: Any) -> str:
         if isinstance(param, np.ndarray):
@@ -44,7 +51,50 @@ class LayerCodeGen:
         return str(param)
 
 
+class OptimizerCodeGen:
+    """Generate code for the optimizer."""
+
+    def __init__(self, optimizer: Optimizer) -> None:
+        self.optimizer = optimizer
+        self.template = self._load_template()
+
+    def _load_template(self) -> str:
+        with resources.path(
+            __package__ + ".templates.optimizers",
+            f"{self.optimizer.serialize()['type'].lower()}.cpp",
+        ) as template_path:
+            template_path = str(template_path)
+
+        with open(template_path, "r") as f:
+            template = f.read()
+
+        return template
+
+    def generate_optimizer_code(self) -> str:
+        placeholders = re.findall(r"@([A-Z_]+) @", self.template)
+        serialized_data = self.optimizer.serialize()
+
+        for placeholder in placeholders:
+            param_name = placeholder.lower()
+            val = serialized_data.get(param_name)
+
+            if val is None:
+                raise ValueError(
+                    f"Hyperparameter '{param_name}' not provided for optimizer"
+                    f"'{serialized_data['type']}'."
+                )
+
+            formatted_val = str(val)
+            self.template = self.template.replace(
+                f"@{placeholder} @", formatted_val
+            )
+
+        return self.template
+
+
 class NetworkCodeGen:
+    """Generate code for forward and backward passes."""
+
     def __init__(self, model_ir: ModelIR) -> None:
         self.model_ir = model_ir
         self.main_template_path = self._load_main_template()
@@ -84,10 +134,15 @@ class NetworkCodeGen:
         declarations = []
         for i in range(len(self.model_ir.nodes)):
             declarations.append(
-                f"void layerFunction_layer{i}_Forward(const std::vector<float> &, std::vector<float> &, const std::vector<float> &, const std::vector<float> &);"
+                f"void layerFunction_layer{i}_Forward(const std::vector<float>"
+                f"&, std::vector<float> &, const "
+                f"std::vector<float> &, const std::vector<float> &);"
             )
             declarations.append(
-                f"void layerFunction_layer{i}_Backward(const std::vector<float> &, const std::vector<float> &, std::vector<float> &, std::vector<float> &, std::vector<float> &, const std::vector<float> &);"
+                f"void layerFunction_layer{i}_Backward(const std::vector"
+                f"<float> &, const std::vector<float> &, std::vector<float> &,"
+                f" std::vector<float> &, std::vector<float> &, const "
+                f"std::vector<float> &);"
             )
         return "\n".join(declarations)
 
@@ -138,27 +193,32 @@ class NetworkCodeGen:
                 f"std::vector<float> {grad_var}({output_dim}, 0.0f);"
             )
             network_initialization.append(
-                f"std::vector<float> {weights_grad_var}({input_dim * output_dim}, 0.0f);"
+                f"std::vector<float> {weights_grad_var}("
+                f"{input_dim * output_dim}, 0.0f);"
             )
             network_initialization.append(
                 f"std::vector<float> {bias_grad_var}({output_dim}, 0.0f);"
             )
 
             forward_pass.append(
-                f"layerFunction_layer{i}_Forward({input_var}, {output_var}, weights{i}, bias{i});"
+                f"layerFunction_layer{i}_Forward({input_var}, {output_var}, "
+                f"weights{i}, bias{i});"
             )
 
             if i < len(self.model_ir.nodes) - 1:
                 next_grad_var = f"grad{i + 1}"
                 backward_pass.append(
-                    f"layerFunction_layer{i}_Backward({input_var}, {next_grad_var}, {grad_var}, weights_grad{i}, bias_grad{i}, weights{i});"
+                    f"layerFunction_layer{i}_Backward({input_var}, "
+                    f"{next_grad_var}, {grad_var}, weights_grad{i}, "
+                    f"bias_grad{i}, weights{i});"
                 )
 
         backward_pass.reverse()
 
         final_output_layer = f"output{len(self.model_ir.nodes) - 1}"
         final_output_handling.append(
-            f"for (const auto& val : {final_output_layer}) std::cout << val << ' ';"
+            f"for (const auto& val : {final_output_layer}) std::cout << val << "
+            f"' ';"
         )
         final_output_handling.append("std::cout << std::endl;")
 
