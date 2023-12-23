@@ -25,8 +25,8 @@ format:
 	$(FORMAT) $(SRC_DIR) $(TEST_DIR)
 	@echo "Sorting imports..."
 	$(SORT) $(SRC_DIR) $(TEST_DIR)
-	@echo "Formatting C++ code..."
-	$(FORMAT_CPP) $(CPP_TEMPLATES_DIR)*.cpp $(CPP_TEMPLATES_DIR)*.h
+	@#echo "Formatting C++ code..."
+	#$(FORMAT_CPP) $(CPP_TEMPLATES_DIR)*.cpp $(CPP_TEMPLATES_DIR)*.h
 
 .PHONY: test test-dl test-compiler
 
