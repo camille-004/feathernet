@@ -1,8 +1,8 @@
 from sklearn.datasets import make_moons
 
 from feathernet.dl import Network
-from feathernet.dl.layers import Dense
 from feathernet.dl.initializers import he_initializer
+from feathernet.dl.layers import Dense
 from feathernet.dl.optimizers import SGD
 from feathernet.frontend import ModelTrainingInterface
 
@@ -22,11 +22,9 @@ if __name__ == "__main__":
     network.add(Dense(hidden_dim2, output_dim, initializer=he_initializer))
 
     optimizer = SGD(0.01)
-    training_params = {"num_epochs": 10, "batch_size": 32}
+    training_params = {"num_epochs": 10, "batch_size": 5}
 
     trainer = ModelTrainingInterface(
         network, dataset, optimizer, training_params
     )
     training_output = trainer.train()
-
-    print(training_output)

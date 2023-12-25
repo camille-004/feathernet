@@ -10,6 +10,12 @@ void layerFunction_Forward(const std::vector<float> &input,
 
   output.resize(output_dim, 0.0f);
 
+  // Print input data
+//  std::cout << "Input data: ";
+//  for (const auto& val : input) std::cout << val << " ";
+//  std::cout << std::endl;
+
+
   // Matrix multiplication
   for (int i = 0; i < output_dim; ++i) {
     for (int j = 0; j < input_dim; ++j) {
@@ -17,6 +23,10 @@ void layerFunction_Forward(const std::vector<float> &input,
     }
     output[i] += bias[i];
   }
+
+  std::cout << "Forward output: ";
+  for (const auto& val : output) std::cout << val << " ";
+  std::cout << std::endl;
 }
 
 void layerFunction_Backward(const std::vector<float> &input,
@@ -27,6 +37,11 @@ void layerFunction_Backward(const std::vector<float> &input,
                             const std::vector<float> &weights) {
   const int input_dim = @INPUT_DIM @;
   const int output_dim = @OUTPUT_DIM @;
+
+    // Print input data
+//  std::cout << "Input data backward: ";
+//  for (const auto& val : input) std::cout << val << " ";
+//  std::cout << std::endl;
 
   input_grad.resize(input_dim, 0.0f);
   weights_grad.resize(input_dim * output_dim, 0.0f);
@@ -39,4 +54,8 @@ void layerFunction_Backward(const std::vector<float> &input,
     }
     bias_grad[i] += output_grad[i];
   }
+
+  std::cout << "Backward gradients: ";
+  for (const auto& val : input_grad) std::cout << val << " ";
+  std::cout << std::endl;
 }

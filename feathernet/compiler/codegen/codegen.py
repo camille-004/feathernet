@@ -109,13 +109,27 @@ class NetworkCodeGen:
 
         return training_template
 
+    def _extract_input_output_dims(self) -> tuple[int, int]:
+        if not self.model_ir.nodes:
+            raise ValueError("Model IR has no nodes.")
+        input_dim = self.model_ir.nodes[0].params.get("input_dim")
+        output_dim = self.model_ir.nodes[-1].params.get("output_dim")
+        return input_dim, output_dim
+
     def _replace_placeholder(
         self, template: str, placeholder: str, content: str
     ) -> str:
         return template.replace(f"@{placeholder} @", content)
 
     def _generate_common_includes(self) -> str:
-        return "#include <cassert>\n#include <iostream>\n#include <vector>\n"
+        return (
+            "#include <cassert>\n"
+            "#include <iostream>\n"
+            "#include <vector>\n"
+            "#include <limits>\n"
+            "#include <string>\n"
+            "#include <cmath>\n"
+        )
 
     def _generate_forward_backward_declarations(self) -> str:
         declarations = []
@@ -178,6 +192,9 @@ class NetworkCodeGen:
             init_func += f"  weights{i} = {np_to_cpp_array(weights)};\n"
             init_func += f"  bias{i} = {np_to_cpp_array(bias)};\n"
 
+        final_output_dim = self.model_ir.nodes[-1].params.get("output_dim")
+        init_func += f"  final_grad.resize({final_output_dim}, 0.0f);\n"
+
         return init_func
 
     def _generate_network_initialization(self, training_template: str) -> str:
@@ -202,7 +219,7 @@ class NetworkCodeGen:
             output_var = f"output{i}"
             forward_call = (
                 f"      layerFunction_layer{i}_Forward({input_var}, "
-                f"{output_var}, weights{i}, bias{i});"
+                f"{output_var}, weights{i}, bias{i});\n"
             )
             forward_pass.append(forward_call)
 
@@ -221,9 +238,11 @@ class NetworkCodeGen:
             backward_call = (
                 f"      layerFunction_layer{i}_Backward({input_var}, "
                 f"{next_grad_var}, {grad_var}, weights_grad{i}, "
-                f"bias_grad{i}, weights{i});"
+                f"bias_grad{i}, weights{i});\n"
             )
-            backward_pass.append(backward_call)
+            clip_call = f"      clip_gradients(weights_grad{i}, 5.0f);\n"
+            clip_call += f"      clip_gradients(bias_grad{i}, 5.0f);\n"
+            backward_pass.append(backward_call + clip_call)
 
         return backward_pass
 
@@ -299,6 +318,7 @@ class NetworkCodeGen:
         training_template = training_template.replace(
             "@FINAL_OUTPUT_HANDLING @", "\n  ".join(final_output_handling)
         )
+
         return training_template
 
     def generate_network_code(
@@ -312,6 +332,15 @@ class NetworkCodeGen:
         ]
         optim_codegen = OptimizerCodeGen(optimizer)
         optimizer_code = optim_codegen.generate_optimizer_code()
+
+        input_dim, output_dim = self._extract_input_output_dims()
+        training_template = self._replace_placeholder(
+            training_template, "INPUT_DIM", str(input_dim)
+        )
+        training_template = self._replace_placeholder(
+            training_template, "OUTPUT_DIM", str(output_dim)
+        )
+
         network_code = (
             common_includes
             + "\n"
@@ -325,4 +354,5 @@ class NetworkCodeGen:
                 training_template, optimizer, training_params
             )
         )
+        # print(network_code)
         return network_code

@@ -25,6 +25,8 @@ class Executor:
         except subprocess.CalledProcessError as e:
             print(f"Compilation failed: {e}")
             return False
+
+        self.binary_path.chmod(0o755)
         return True
 
     def exec(self) -> str:

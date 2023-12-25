@@ -18,7 +18,7 @@ class Dense(BaseLayer):
             self.initializer = initializer
 
         self.weights = self.initializer((input_dim, output_dim))
-        self.bias = np.zeros(output_dim)
+        self.bias = self.initializer((output_dim,))
 
         self.weights_grad = np.zeros_like(self.weights)
         self.bias_grad = np.zeros_like(self.bias)
