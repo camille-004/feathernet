@@ -1,18 +1,12 @@
 LINT = flake8
 FORMAT = black --line-length 79
 SORT = isort
-LINT_CPP = cpplint
-FORMAT_CPP = clang-format -i
-CMAKE = cmake
-MAKE = make
 
 SRC_DIR := feathernet/
 EXAMPLES_DIR := examples/
 TEST_DIR := tests/
-COMPILER_TESTS := $(TEST_DIR)compiler/
-BUILD_DIR := $(CPP_DIR)build/
 
-.PHONY: lint format build-cpp
+.PHONY: lint format
 
 lint:
 	@echo "Linting code..."
