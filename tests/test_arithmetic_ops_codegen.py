@@ -1,7 +1,7 @@
 import unittest
 
 from feathernet.ops.basic import add, div, mult, sub
-from feathernet.translator.ir_nodes import IROperation, IRLiteral
+from feathernet.translator.ir_nodes import IRLiteral, IROperation
 from feathernet.translator.translators import IRTranslator
 
 
