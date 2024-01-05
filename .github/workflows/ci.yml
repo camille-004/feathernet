@@ -41,7 +41,7 @@ jobs:
       - name: Update dependencies
         run: poetry update
 
-      - name: Run compiler tests
+      - name: Run unit tests
         run: |
           coverage run -m unittest discover tests
           coverage report --fail-under 80

@@ -19,8 +19,6 @@ lint:
 	$(LINT) $(SRC_DIR) $(TEST_DIR)
 	@echo "Checking import order..."
 	$(SORT) --check-only $(SRC_DIR) $(TEST_DIR) $(EXAMPLES_DIR)
-	@echo "Linting C++ code..."
-	$(LINT_CPP) $(CPP_DIR)*.cpp $(CPP_DIR)*.h
 
 format:
 	@echo "Formatting code..."
@@ -28,7 +26,7 @@ format:
 	@echo "Sorting imports..."
 	$(SORT) $(SRC_DIR) $(TEST_DIR) $(EXAMPLES_DIR)
 
-.PHONY: test test-dl test-compiler
+.PHONY: test
 
 test:
 	@echo "Running tests with coverage..."
