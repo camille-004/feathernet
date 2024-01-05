@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.ref == 'refs/heads/main'  # Only on pushes to main.
     permissions:
       contents: read
@@ -30,7 +30,7 @@ jobs:
 
   test:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: ghcr.io/${{ github.repository_owner }}/feathernet:latest
 
