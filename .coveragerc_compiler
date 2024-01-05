@@ -1,4 +1,0 @@
-[run]
-omit =
-    feathernet/dl/*
-    feathernet/frontend/*
