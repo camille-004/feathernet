@@ -21,6 +21,7 @@ scipy = "^1.11.4"
 tqdm = "^4.66.1"
 cpplint = "^1.6.1"
 matplotlib = "^3.8.2"
+pybind11 = "^2.11.1"
 
 [tool.isort]
 line_length = 79

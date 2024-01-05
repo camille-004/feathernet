@@ -2,6 +2,7 @@ FROM python:3.10-slim
 
 RUN apt-get update && apt-get install -y \
     make \
+    cmake \
     clang-format \
     g++ \
     && rm -rf /var/lib/apt/lists/*  # Clean up apt caches.
@@ -14,3 +15,5 @@ COPY . .
 
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
+
+RUN make build-cpp
