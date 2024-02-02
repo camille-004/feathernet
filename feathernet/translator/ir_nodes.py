@@ -8,7 +8,7 @@ class IRVariable(IROperation):
 
 
 class IRLiteral(IROperation):
-    def __init__(self, value: float | int) -> None:
+    def __init__(self, value: float) -> None:
         self.value = value
 
 

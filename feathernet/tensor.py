@@ -9,7 +9,7 @@ from feathernet.translator.translators import IRTranslator
 
 
 class Tensor:
-    def __init__(self, data: float | int | list | np.ndarray) -> None:
+    def __init__(self, data: float | list | np.ndarray) -> None:
         self.data = data
         self.grad: Tensor = None
 
@@ -50,6 +50,7 @@ class Tensor:
 
 def exec_op(ir_op: IROperation) -> np.ndarray:
     cuda = IRTranslator.translate_node(ir_op)
+    print("Generated CUDA code:\n", cuda)
     mod = SourceModule(cuda)
     compute = mod.get_function("compute")
     output = np.empty_like(ir_op)

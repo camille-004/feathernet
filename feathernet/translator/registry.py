@@ -8,7 +8,7 @@ class OperationRegistry:
     def register(self, operation_name: str, handler: Callable) -> None:
         self._registry[operation_name] = handler
 
-    def get_handler(self, operation_name: str) -> Callable | None:
+    def get_handler(self, operation_name: str) -> Callable:
         return self._registry.get(operation_name)
 
 

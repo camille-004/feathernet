@@ -35,23 +35,37 @@ class IRTranslator:
             "DivideOperation": "/",
         }
         operation_symbol = op_map[type(ir_node).__name__]
-        left_code = IRTranslator.translate_node(ir_node.left)
-        right_code = IRTranslator.translate_node(ir_node.right)
-        return f"({left_code} {operation_symbol} {right_code})"
+        left_code = IRTranslator.translate_node(
+            ir_node.left, wrap_kernel=False
+        )
+        right_code = IRTranslator.translate_node(
+            ir_node.right, wrap_kernel=False
+        )
+        return f"({left_code} {operation_symbol} {right_code});"
 
     @staticmethod
-    def translate_node(ir_node: IROperation) -> str:
+    def translate_node(ir_node: IROperation, wrap_kernel: bool = True) -> str:
         if isinstance(ir_node, BinaryOperation):
-            return IRTranslator.translate_binary_operation(ir_node)
-
-        operation_name = type(ir_node).__name__
-        translator = operation_registry.get_handler(operation_name)
-        if translator:
-            return translator(ir_node)
+            source = IRTranslator.translate_binary_operation(ir_node)
         else:
-            raise NotImplementedError(
-                f"No translator registered for {operation_name}."
-            )
+            operation_name = type(ir_node).__name__
+            translator = operation_registry.get_handler(operation_name)
+            if translator:
+                source = translator(ir_node)
+            else:
+                raise NotImplementedError(
+                    f"No translator registered for {operation_name}."
+                )
+
+        if wrap_kernel:
+            kernel_func = f"""
+__global__ void compute() {{
+    {source}
+}}
+"""
+            return kernel_func
+        else:
+            return source
 
 
 register_op("IRAddOperation")(IRTranslator.translate_binary_operation)
