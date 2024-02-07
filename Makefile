@@ -24,4 +24,4 @@ format:
 
 test:
 	@echo "Running tests with coverage..."
-	coverage run -m unittest discover -s $(TEST_DIR)
+	python -m coverage run -m unittest discover -s $(TEST_DIR)

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from feathernet.translator.ir_nodes import (
     BinaryOperation,
     IRAssignment,
@@ -9,6 +11,12 @@ from feathernet.translator.registry import operation_registry, register_op
 
 
 class IRTranslator:
+    @staticmethod
+    def load_template(op_name: str) -> str:
+        templates_dir = Path(__file__).parent.parent / "templates"
+        template_path = templates_dir / "ops" / f"{op_name}.cu"
+        return template_path.read_text()
+
     @staticmethod
     @register_op("IRVariable")
     def translate_variable(ir_node: IRVariable) -> str:
@@ -29,22 +37,21 @@ class IRTranslator:
     @staticmethod
     def translate_binary_operation(ir_node: BinaryOperation) -> str:
         op_map = {
-            "AddOperation": "+",
-            "SubtractOperation": "-",
-            "MultiplyOperation": "*",
-            "DivideOperation": "/",
+            "AddOperation": "add",
+            "SubtractOperation": "sub",
+            "MultiplyOperation": "mult",
+            "DivideOperation": "div",
         }
-        operation_symbol = op_map[type(ir_node).__name__]
-        left_code = IRTranslator.translate_node(
-            ir_node.left, wrap_kernel=False
-        )
-        right_code = IRTranslator.translate_node(
-            ir_node.right, wrap_kernel=False
-        )
-        return f"({left_code} {operation_symbol} {right_code});"
+        op_name = op_map[type(ir_node).__name__]
+        if not op_name:
+            raise NotImplementedError(
+                f"No template registered for {type(ir_node).__name__}."
+            )
+        template = IRTranslator.load_template(op_name)
+        return template
 
     @staticmethod
-    def translate_node(ir_node: IROperation, wrap_kernel: bool = True) -> str:
+    def translate_node(ir_node: IROperation) -> str:
         if isinstance(ir_node, BinaryOperation):
             source = IRTranslator.translate_binary_operation(ir_node)
         else:
@@ -57,15 +64,7 @@ class IRTranslator:
                     f"No translator registered for {operation_name}."
                 )
 
-        if wrap_kernel:
-            kernel_func = f"""
-__global__ void compute() {{
-    {source}
-}}
-"""
-            return kernel_func
-        else:
-            return source
+        return source
 
 
 register_op("IRAddOperation")(IRTranslator.translate_binary_operation)

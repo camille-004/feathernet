@@ -1,6 +1,8 @@
 from typing import Callable
 
 import numpy as np
+import pycuda.autoinit  # noqa
+from pycuda import driver as cuda
 from pycuda.compiler import SourceModule
 
 from feathernet.ops.basic import add, div, mult, sub
@@ -22,7 +24,7 @@ class Tensor:
     def __mul__(self, other: "Tensor") -> "Tensor":
         return self._op(mult, self, other)
 
-    def __div__(self, other: "Tensor") -> "Tensor":
+    def __truediv__(self, other: "Tensor") -> "Tensor":
         return self._op(div, self, other)
 
     def _op(
@@ -49,10 +51,18 @@ class Tensor:
 
 
 def exec_op(ir_op: IROperation) -> np.ndarray:
-    cuda = IRTranslator.translate_node(ir_op)
-    print("Generated CUDA code:\n", cuda)
-    mod = SourceModule(cuda)
-    compute = mod.get_function("compute")
-    output = np.empty_like(ir_op)
-    compute(cuda.Out(output), block=(1, 1, 1), grid=(1, 1))
-    return output
+    cuda_code = IRTranslator.translate_node(ir_op)
+    # print("Generated CUDA code:\n", cuda_code)
+    mod = SourceModule(cuda_code)
+    kernel = mod.get_function("compute")
+    a_np = np.asarray(ir_op.left.value, dtype=np.float32)
+    b_np = np.asarray(ir_op.right.value, dtype=np.float32)
+    a_gpu = cuda.mem_alloc(a_np.nbytes)
+    b_gpu = cuda.mem_alloc(b_np.nbytes)
+    result_gpu = cuda.mem_alloc(a_np.nbytes)
+    cuda.memcpy_htod(a_gpu, a_np)
+    cuda.memcpy_htod(b_gpu, b_np)
+    kernel(a_gpu, b_gpu, result_gpu, block=(a_np.size, 1, 1), grid=(1, 1))
+    result_np = np.empty_like(a_np)
+    cuda.memcpy_dtoh(result_np, result_gpu)
+    return result_np

@@ -43,9 +43,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Update dependencies
-        run: poetry update
-
       - name: Run unit tests
         run: |
           coverage run -m unittest discover tests
