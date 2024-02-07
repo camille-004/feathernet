@@ -20,6 +20,6 @@ test:
     - docker run --gpus all $CI_REGISTRY_IMAGE/feathernet make test
 
   after_script:
-    - wget -0 codecov.sh https://codecov.io/bash
+    - wget -O codecov.sh https://codecov.io/bash
     - chmod +x codecov.sh
     - ./codecov.sh
