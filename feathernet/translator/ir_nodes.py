@@ -1,15 +1,20 @@
+import numpy as np
+
+
 class IROperation:
     pass
 
 
 class IRVariable(IROperation):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, shape: tuple = None) -> None:
         self.name = name
+        self.shape = shape
 
 
 class IRLiteral(IROperation):
-    def __init__(self, value: float) -> None:
+    def __init__(self, value: float, shape: tuple = None) -> None:
         self.value = value
+        self.shape = value.shape if isinstance(value, np.ndarray) else shape
 
 
 class IRAssignment(IROperation):

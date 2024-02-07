@@ -45,7 +45,7 @@ jobs:
 
       - name: Run container with GPU support
         run: |
-          /usr/local/bin/docker run --gpus all -v ${{ github.workspace }}:/workspace ghcr.io/${{ github.repository_owner }}/feathernet/latest /bin/bash -c "cd /workspace && coverage run -m unittest discover tests && coverage report --fail-under 80"
+          /usr/bin/docker run --gpus all -v ${{ github.workspace }}:/workspace ghcr.io/${{ github.repository_owner }}/feathernet/latest /bin/bash -c "cd /workspace && coverage run -m unittest discover tests && coverage report --fail-under 80"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
