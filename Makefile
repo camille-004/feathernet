@@ -31,4 +31,3 @@ test-ci:
 	python -m coverage run -m unittest discover -s $(TEST_DIR)
 	@echo "Generating coverage report..."
 	python -m coverage xml -o coverage.xml
-	curl -s https://codecov.io/bash | bash -s -- -y coverage.xml
