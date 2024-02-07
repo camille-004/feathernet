@@ -1,0 +1,18 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - docker build -t feathernet .
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker tag feathernet $CI_REGISTRY_IMAGE/feathernet
+    - docker push $CI_REGISTRY_IMAGE/feathernet
+
+test:
+  stage: test
+  script:
+    - nvidia-smi
+    - docker pull $CI_REGISTRY_IMAGE/feathernet
+    - docker run --gpus all $CI_REGISTRY_IMAGE/feathernet make test
