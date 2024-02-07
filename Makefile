@@ -20,7 +20,7 @@ format:
 	@echo "Sorting imports..."
 	$(SORT) $(SRC_DIR) $(TEST_DIR) $(EXAMPLES_DIR)
 
-.PHONY: test
+.PHONY: test test-ci
 
 test:
 	@echo "Running tests locally..."
