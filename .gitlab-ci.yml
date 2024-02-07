@@ -5,6 +5,8 @@ stages:
 
 check_runner:
   stage: check_runner
+  tags:
+    - linux
   script:
     - |
       echo "Runner information:"
