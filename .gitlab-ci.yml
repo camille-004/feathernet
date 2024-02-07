@@ -29,4 +29,6 @@ push_to_github:
   only:
     - main
   script:
+    - git clone https://github.com/camille-004/feathernet.git temp
+    - cd temp
     - git push --force "https://camille-004:${GITHUB_TOKEN}@github.com/camille-004/feathernet.git" HEAD:main

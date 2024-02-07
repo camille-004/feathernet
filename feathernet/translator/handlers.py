@@ -10,6 +10,7 @@ from feathernet.translator.ir_nodes import (
     IRVariable,
     MultiplyOperation,
     SubtractOperation,
+    MatrixMultiplyOperation,
 )
 from feathernet.translator.registry import operation_registry, register_op
 
@@ -76,6 +77,13 @@ class ASTHandler:
         return DivideOperation(left, right)
 
     @staticmethod
+    @register_op("MatMult")
+    def handle_matmult(node: ast.BinOp) -> MatrixMultiplyOperation:
+        left = ASTHandler.handle_node(node.left)
+        right = ASTHandler.handle_node(node.right)
+        return MatrixMultiplyOperation(left, right)
+
+    @staticmethod
     @register_op("BinOp")
     def handle_binop(node: ast.BinOp) -> BinaryOperation:
         if isinstance(node.op, ast.Add):
@@ -86,6 +94,8 @@ class ASTHandler:
             return ASTHandler.handle_multiply(node)
         elif isinstance(node.op, ast.Div):
             return ASTHandler.handle_divide(node)
+        elif isinstance(node.op, ast.MatMult):
+            return ASTHandler.handle_matmult(node)
         else:
             raise NotImplementedError("Unsupported binary operation.")
 
