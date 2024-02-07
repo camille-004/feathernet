@@ -3,18 +3,6 @@ stages:
   - build
   - test
 
-check_runner:
-  stage: check_runner
-  script:
-    - |
-      echo "Runner information:"
-      echo "Runner ID: $CI_RUNNER_ID"
-      echo "Runner description: $CI_RUNNER_DESCRIPTION"
-      echo "Runner version: $CI_RUNNER_VERSION"
-      echo "Runner platform: $CI_RUNNER_PLATFORM"
-      echo "Runner architecture: $CI_RUNNER_ARCH"
-      echo "Runner executor: $CI_RUNNER_EXECUTOR"
-
 build:
   stage: build
   script:
@@ -27,5 +15,6 @@ test:
   stage: test
   script:
     - nvidia-smi
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker pull $CI_REGISTRY_IMAGE/feathernet
     - docker run --gpus all $CI_REGISTRY_IMAGE/feathernet make test
