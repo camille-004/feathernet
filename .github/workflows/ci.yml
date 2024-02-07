@@ -43,10 +43,9 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Run unit tests
+      - name: Run container with GPU support
         run: |
-          coverage run -m unittest discover tests
-          coverage report --fail-under 80
+          docker run --gpus all -v ${{ github.workspace }}:/workspace ghcr.io/${{ github.repository_owner }}/feathernet/latest /bin/bash -c "cd /workspace && coverage run -m unittest discover tests && coverage report --fail-under 80"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
