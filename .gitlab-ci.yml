@@ -1,6 +1,18 @@
 stages:
+  - check_runner
   - build
   - test
+
+check_runner:
+  stage: check_runner
+  script:
+    - echo "Runner information:"
+    - echo "Runner ID: $CI_RUNNER_ID"
+    - echo "Runner description: $CI_RUNNER_DESCRIPTION"
+    - echo "Runner version: $CI_RUNNER_VERSION"
+    - echo "Runner platform: $CI_RUNNER_PLATFORM"
+    - echo "Runner architecture: $CI_RUNNER_ARCH"
+    - echo "Runner executor: $CI_RUNNER_EXECUTOR"
 
 build:
   stage: build
