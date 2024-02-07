@@ -19,8 +19,7 @@ test:
     - CONTAINER_ID=$(docker run -d --gpus all $CI_REGISTRY_IMAGE/feathernet /bin/sh -c "make test-ci; sleep 10")
     - docker wait $CONTAINER_ID
     - docker logs $CONTAINER_ID
-    - docker exec $CONTAINER_ID ls -la /usr/src/app
-    - docker cp $CONTAINER_ID:/usr/src/app/coverage.xml coverage_report.xml
+    - docker cp $CONTAINER_ID:/usr/src/app/coverage.xml coverage_report.xml || echo "Failed to copy coverage report. The file might not exist or the container might have exited."
     - wget -O codecov.sh https://codecov.io/bash
     - chmod +x codecov.sh
     - ./codecov.sh -f coverage_report.xml
