@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - push
 
 build:
   stage: build
@@ -18,8 +19,14 @@ test:
     - docker pull $CI_REGISTRY_IMAGE/feathernet
     - CONTAINER_ID=$(docker run -d --gpus all $CI_REGISTRY_IMAGE/feathernet /bin/sh -c "python -m coverage run -m unittest discover -s tests/ && python -m coverage xml -o coverage.xml")
     - docker wait $CONTAINER_ID
-    - docker logs $CONTAINER_ID
     - docker cp $CONTAINER_ID:/app/coverage.xml coverage_report.xml || echo "Failed to copy coverage report. The file might not exist or the container might have exited."
     - wget -O codecov.sh https://codecov.io/bash
     - chmod +x codecov.sh
     - ./codecov.sh -f coverage_report.xml
+
+push_to_github:
+  stage: push
+  only:
+    - main
+  script:
+    - git push --force "https://camille-004:${GITHUB_TOKEN}@github.com/camille-004/feathernet.git" HEAD:main

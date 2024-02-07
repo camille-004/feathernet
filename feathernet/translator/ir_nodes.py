@@ -1,20 +1,23 @@
-import numpy as np
-
-
 class IROperation:
     pass
 
 
 class IRVariable(IROperation):
-    def __init__(self, name: str, shape: tuple = None) -> None:
+    def __init__(
+        self, name: str, shape: tuple = None, dtype: str = None
+    ) -> None:
         self.name = name
         self.shape = shape
+        self.dtype = dtype
 
 
 class IRLiteral(IROperation):
-    def __init__(self, value: float, shape: tuple = None) -> None:
+    def __init__(
+        self, value: float, shape: tuple = None, dtype: str = None
+    ) -> None:
         self.value = value
-        self.shape = value.shape if isinstance(value, np.ndarray) else shape
+        self.shape = shape
+        self.dtype = dtype
 
 
 class IRAssignment(IROperation):
@@ -43,3 +46,12 @@ class MultiplyOperation(BinaryOperation):
 
 class DivideOperation(BinaryOperation):
     pass
+
+
+class MatrixMultiplyOperation(BinaryOperation):
+    pass
+
+
+class MatrixTransposeOperation(IROperation):
+    def __init__(self, operand: IROperation) -> None:
+        self.operand = operand
