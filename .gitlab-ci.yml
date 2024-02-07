@@ -17,6 +17,8 @@ check_runner:
 
 build:
   stage: build
+  tags:
+    - linux
   script:
     - docker build -t feathernet .
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -25,6 +27,8 @@ build:
 
 test:
   stage: test
+  tags:
+    - linux
   script:
     - nvidia-smi
     - docker pull $CI_REGISTRY_IMAGE/feathernet
