@@ -43,6 +43,9 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Add Docker to PATH
+        run: echo "/usr/local/bin/docker" >> $GITHUB_PATH
+
       - name: Run container with GPU support
         run: |
           docker run --gpus all -v ${{ github.workspace }}:/workspace ghcr.io/${{ github.repository_owner }}/feathernet/latest /bin/bash -c "cd /workspace && coverage run -m unittest discover tests && coverage report --fail-under 80"
