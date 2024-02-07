@@ -18,8 +18,7 @@ test:
     - docker pull $CI_REGISTRY_IMAGE/feathernet
     - CONTAINER_ID=$(docker run -d --gpus all $CI_REGISTRY_IMAGE/feathernet make test-ci)
     - docker wait $CONTAINER_ID
-    - ls
-    - docker cp $CONTAINER_ID:/coverage.xml coverage_report.xml
+    - docker cp $CONTAINER_ID:/usr/src/app/coverage.xml coverage_report.xml
     - wget -O codecov.sh https://codecov.io/bash
     - chmod +x codecov.sh
     - ./codecov.sh -f coverage_report.xml
