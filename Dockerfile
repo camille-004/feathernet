@@ -17,4 +17,4 @@ RUN python3.11 -m venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 
 RUN pip install --upgrade pip \
-    && pip install -v -r requirements.txt
+    && pip install -r requirements.txt
