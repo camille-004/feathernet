@@ -16,8 +16,9 @@ test:
     - nvidia-smi
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker pull $CI_REGISTRY_IMAGE/feathernet
-    - CONTAINER_ID=$(docker run -d --gpus all $CI_REGISTRY_IMAGE/feathernet "make test-ci && tail -f /dev/null")
+    - CONTAINER_ID=$(docker run -d --gpus all $CI_REGISTRY_IMAGE/feathernet "make test-ci; sleep 10")
     - docker wait $CONTAINER_ID
+    - docker logs $CONTAINER_ID
     - docker exec $CONTAINER_ID ls -la /usr/src/app
     - docker cp $CONTAINER_ID:/usr/src/app/coverage.xml coverage_report.xml
     - wget -O codecov.sh https://codecov.io/bash
