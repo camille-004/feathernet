@@ -20,14 +20,8 @@ format:
 	@echo "Sorting imports..."
 	$(SORT) $(SRC_DIR) $(TEST_DIR) $(EXAMPLES_DIR)
 
-.PHONY: test test-ci
+.PHONY: test
 
 test:
 	@echo "Running tests locally..."
 	python -m coverage run -m unittest discover -s $(TEST_DIR)
-
-test-ci:
-	@echo "Running tests for CI..."
-	python -m coverage run -m unittest discover -s $(TEST_DIR)
-	@echo "Generating coverage report..."
-	python -m coverage xml -o coverage.xml
