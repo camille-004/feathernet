@@ -15,7 +15,7 @@ class Tensor:
     def __init__(
         self, data: ArrayLike | Node, device: DeviceType = "cpu"
     ) -> None:
-        self.device = device
+        self._device = device
         if isinstance(data, Node):
             self._ir_node: Node | None = data
             self._data = None
@@ -47,6 +47,10 @@ class Tensor:
             return self._data.dtype
         else:
             return None
+
+    @property
+    def device(self) -> DeviceType:
+        return self._device
 
     def __repr__(self) -> str:
         return f"Tensor(shape={self.shape}, dtype={self.dtype}, device={self.device})\n{self.data}"  # noqa
