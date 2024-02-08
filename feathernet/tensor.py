@@ -1,68 +1,131 @@
-from typing import Callable
+from typing import Literal
 
 import numpy as np
 import pycuda.autoinit  # noqa
-from pycuda import driver as cuda
-from pycuda.compiler import SourceModule
+from numpy.typing import ArrayLike
 
-from feathernet.ops.basic import add, div, mult, sub
-from feathernet.translator.ir_nodes import IRLiteral, IROperation, IRVariable
-from feathernet.translator.translators import IRTranslator
+from feathernet.ir.core import Node
+from feathernet.ir.dispatch_tables import CPU_OPERATIONS, GPU_OPERATIONS
+from feathernet.ir.ops import AddNode
+
+DeviceType = Literal["cpu", "gpu"]
 
 
 class Tensor:
-    def __init__(self, data: float | list | np.ndarray) -> None:
-        self.data = data
-        self.grad: Tensor = None
-
-    def __add__(self, other: "Tensor") -> "Tensor":
-        return self._op(add, self, other)
-
-    def __sub__(self, other: "Tensor") -> "Tensor":
-        return self._op(sub, self, other)
-
-    def __mul__(self, other: "Tensor") -> "Tensor":
-        return self._op(mult, self, other)
-
-    def __truediv__(self, other: "Tensor") -> "Tensor":
-        return self._op(div, self, other)
-
-    def _op(
-        self,
-        operation: Callable[[IROperation, IROperation], IROperation],
-        left: "Tensor",
-        right: "Tensor",
-    ):
-        ir_left = self._to_ir(left)
-        ir_right = self._to_ir(right)
-        ir_res = operation(ir_left, ir_right)
-        result = exec_op(ir_res)
-        return Tensor(result)
-
-    def _to_ir(self, tensor: "Tensor") -> IROperation:
-        if isinstance(tensor.data, (int, float)):
-            return IRLiteral(tensor.data)
-        elif isinstance(tensor.data, IRVariable):
-            return tensor.data
+    def __init__(
+        self, data: ArrayLike | Node, device: DeviceType = "cpu"
+    ) -> None:
+        self.device = device
+        if isinstance(data, Node):
+            self._ir_node: Node | None = data
+            self._data = None
+            self._shape = None
+            self._dtype = None
         else:
-            raise NotImplementedError(
-                "Conversion for the given tensor type is not implemented."
+            self._ir_node = None
+            self._data = np.array(data)
+            self._shape = self.data.shape
+            self._dtype = self.data.dtype
+
+    @property
+    def data(self) -> np.ndarray:
+        if self._data is None and self._ir_node is not None:
+            return self._ir_node.data
+        else:
+            return self._data
+
+    @property
+    def shape(self) -> tuple[int, ...] | None:
+        if self._data is not None:
+            return self._data.shape
+        else:
+            return None
+
+    @property
+    def dtype(self) -> np.dtype | None:
+        if self._data is not None:
+            return self._data.dtype
+        else:
+            return None
+
+    def __repr__(self) -> str:
+        return f"Tensor(shape={self.shape}, dtype={self.dtype}, device={self.device})\n{self.data}"  # noqa
+
+    def _prepare(self, other: "Tensor", operation: str) -> "Tensor":
+        if not isinstance(other, Tensor):
+            raise ValueError(f"Operand must be a Tensor for {operation}.")
+        if self.shape != other.shape:
+            raise ValueError(
+                f"Tensors must have the same shape for {operation}."
             )
 
+        if self.device != other.device:
+            other = other.to(self.device)
 
-def exec_op(ir_op: IROperation) -> np.ndarray:
-    cuda_code = IRTranslator.translate_node(ir_op)
-    # print("Generated CUDA code:\n", cuda_code)
-    mod = SourceModule(cuda_code)
-    kernel = mod.get_function("compute")
-    a_np = np.asarray(ir_op.left.value, dtype=np.float32)
-    b_np = np.asarray(ir_op.right.value, dtype=np.float32)
-    a_gpu = cuda.mem_alloc(a_np.nbytes)
-    b_gpu = cuda.mem_alloc(b_np.nbytes)
-    result_gpu = cuda.mem_alloc(a_np.nbytes)
-    cuda.memcpy_htod(a_gpu, a_np)
-    cuda.memcpy_htod(b_gpu, b_np)
-    kernel(a_gpu, b_gpu, result_gpu, block=(a_np.size, 1, 1), grid=(1, 1))
-    result_np = np.empty_like(a_np)
-    cuda.memcpy_dtoh(result_np, result_gpu)
-    return result_np
+        return other
+
+    def to(self, device: DeviceType) -> "Tensor":
+        if device == self.device:
+            return self
+
+        new = (
+            Tensor(self.data, device=device)
+            if self.data is not None
+            else Tensor(self._ir_node, device=device)
+        )
+        new.ir_node = self._ir_node
+        return new
+
+    def evaluate(self) -> "Tensor":
+        executor = GraphExecutor()
+        result_data = executor.evaluate(self._ir_node)
+        return Tensor(result_data, device=self.device)
+
+    def __add__(self, other: "Tensor") -> "Tensor":
+        other = self._prepare(other, "addition")
+        add_node = AddNode([self, other])
+        return Tensor(add_node, device=self.device).evaluate()
+
+
+class GraphExecutor:
+    def __init__(self) -> None:
+        self.cache: dict[Node, np.ndarray] = {}
+
+    def evaluate(self, node: Node | Tensor) -> np.ndarray:
+        # If node is a tensor with raw data.
+        if node is None or (
+            isinstance(node, Tensor) and node.data is not None
+        ):
+            return node.data
+
+        # Avoid redundant computation.
+        if node in self.cache:
+            return self.cache[node]
+
+        operands = [self.evaluate(operand) for operand in node.operands]
+
+        if hasattr(operands[0], "device") and operands[0].device == "gpu":
+            result = self._exec_gpu(node, operands)
+        else:
+            result = self._exec_cpu(node, operands)
+
+        self.cache[node] = result
+        return result
+
+    def _exec_cpu(self, node: Node | Tensor, operands: list) -> np.ndarray:
+        op_func = CPU_OPERATIONS.get(type(node))
+        if op_func:
+            return op_func(operands)
+        else:
+            raise NotImplementedError(
+                f"CPU operation '{type(node).__name__}' not implemented."
+            )
+
+    def _exec_gpu(self, node: Node | Tensor, operands: list) -> np.ndarray:
+        op_func = GPU_OPERATIONS.get(type(Node))
+        if op_func:
+            return op_func(operands)
+        else:
+            raise NotImplementedError(
+                f"GPU operation '{type(node).__name__}' not implemented."
+            )
