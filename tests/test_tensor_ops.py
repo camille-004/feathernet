@@ -102,6 +102,29 @@ class TestTensorSub(unittest.TestCase):
         result = tensor_a - tensor_b
         np.testing.assert_array_equal(result.data, np.array([-3, -3, -3]))
 
+    def test_combined_addition_subtraction(self) -> None:
+        tensor_a = Tensor([100, 200, 300], device="cpu")
+        tensor_b = Tensor([10, 20, 30], device="cpu")
+        tensor_c = Tensor([1, 2, 3], device="cpu")
+        tensor_d = Tensor([5, 5, 5], device="cpu")
+
+        result_cpu = tensor_a - tensor_b + tensor_c - tensor_d
+        result_gpu = (
+            tensor_a.to("gpu")
+            - tensor_b.to("gpu")
+            + tensor_c.to("gpu")
+            - tensor_d.to("gpu")
+        )
+
+        expected_result = (
+            np.array([100, 200, 300])
+            - np.array([10, 20, 30])
+            + np.array([1, 2, 3])
+            - np.array([5, 5, 5])
+        )
+        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
+        np.testing.assert_array_equal(result_cpu.data, expected_result)
+
 
 class TestTensorMatMul(unittest.TestCase):
     def test_vector_matmul(self) -> None:

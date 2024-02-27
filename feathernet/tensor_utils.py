@@ -1,15 +1,16 @@
 import numpy as np
 
+from feathernet.common.enums import OpType
 from feathernet.common.types import DeviceType, ShapeType
 from feathernet.ir.ops import MatMulNode
 
 
 def prepare_tensors(
-    a: "Tensor", b: "Tensor", operation: str
+    a: "Tensor", b: "Tensor", operation: OpType
 ) -> tuple[ShapeType | None, ShapeType | None]:
     self_shape, other_shape = None, None
 
-    if operation == "matmul":
+    if operation == OpType.MATMUL:
         # Check for vectors.
         self_shape = a.shape if len(a.shape) > 1 else (1, a.shape[0])
         other_shape = b.shape if len(b.shape) > 1 else (b.shape[0], 1)
@@ -18,7 +19,7 @@ def prepare_tensors(
             raise ValueError(
                 f"Shape mismatch for matrix multiplication: {a.shape} and {b.shape}."
             )
-    elif operation in ["addition", "subtraction"]:
+    elif operation in [OpType.ADD, OpType.SUB]:
         if np.isscalar(a.data) or np.isscalar(b.data):
             self_shape, other_shape = broadcast_shapes(a.shape, b.shape)
         elif a.shape != b.shape:

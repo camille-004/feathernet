@@ -2,7 +2,7 @@ import numpy as np
 import pycuda.autoinit  # noqa
 from numpy.typing import ArrayLike
 
-from feathernet.common.types import DeviceType, ShapeType
+from feathernet.common.types import DeviceType, ShapeType, TensorSupported
 from feathernet.ir.core import Node
 from feathernet.ir.ops import AddNode, SubNode
 from feathernet.tensor_utils import (
@@ -78,9 +78,20 @@ class Tensor:
 
     def __repr__(self) -> str:
         dtype_name = getattr(self.dtype, "__name__", str(self.dtype))
-        return f"Tensor(shape={self.shape}, dtype={dtype_name}, device={self.device})\nData: {self.data}\n"  # noqa
+        return (
+            f"Tensor(shape={self.shape}, dtype={dtype_name}, "
+            f"device={self.device})\nData: {self.data}\n"
+        )  # noqa
 
-    def _prepare(self, other: "Tensor", operation: str) -> "Tensor":
+    def _convert_and_prepare_other(
+        self, other: TensorSupported, operation: str
+    ) -> tuple["Tensor", "Tensor", ShapeType, ShapeType]:
+        other = convert_to_tensor(other, device=self.device)
+        return self._prepare(other, operation)
+
+    def _prepare(
+        self, other: "Tensor", operation: str
+    ) -> tuple["Tensor", "Tensor", ShapeType, ShapeType]:
         if not isinstance(other, Tensor):
             raise ValueError(f"Operand must be a Tensor for {operation}.")
         if self.device != other.device:
@@ -158,26 +169,22 @@ class Tensor:
             raise ValueError("Operand must be a Tensor.")
         return self.matmul(other)
 
-    def __add__(self, other: "Tensor") -> "Tensor":
-        other = convert_to_tensor(other, device=self.device)
-        if np.isscalar(other.data) or other.shape == (1, 1):
+    def _apply_bin_op(
+        self, other: "Tensor", op_node_class: type[Node]
+    ) -> "Tensor":
+        _, other, _, _ = self._convert_and_prepare_other(
+            other, op_node_class.__name__.lower()
+        )
+        if np.isscalar(other.data):
             other_shape = broadcast_shapes(self.shape, other.shape)
             other_data = np.full(other_shape, other.data, dtype=self.dtype)
             other = Tensor(other_data, device=self.device)
-        else:
-            _, other, _, _ = self._prepare(other, "addition")
 
-        add_node = AddNode([self, other])
-        return Tensor(add_node, device=self.device).evaluate()
+        op_node = op_node_class([self, other])
+        return Tensor(op_node, device=self.device).evaluate()
+
+    def __add__(self, other: "Tensor") -> "Tensor":
+        return self._apply_bin_op(other, AddNode)
 
     def __sub__(self, other: "Tensor") -> "Tensor":
-        other = convert_to_tensor(other, device=self.device)
-        if np.isscalar(other.data) or other.shape == (1, 1):
-            other_shape = broadcast_shapes(self.shape, other.shape)
-            other_data = np.full(other_shape, other.data, dtype=self.dtype)
-            other = Tensor(other_data, device=self.device)
-        else:
-            _, other, _, _ = self._prepare(other, "subtraction")
-
-        sub_node = SubNode([self, other])
-        return Tensor(sub_node, device=self.device).evaluate()
+        return self._apply_bin_op(other, SubNode)
