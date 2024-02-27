@@ -32,6 +32,20 @@ class TestTensorOps(unittest.TestCase):
             result_cpu.data, np.array([[6, 8], [10, 12]])
         )
 
+    def test_scalar_addition_multiple_addends(self) -> None:
+        tensor_a = Tensor(5, device="cpu")
+        tensor_b = Tensor(3, device="cpu")
+        tensor_c = Tensor(4, device="cpu")
+        tensor_d = Tensor(2, device="cpu")
+
+        result_cpu = tensor_a + tensor_b + tensor_c + tensor_d
+        result_gpu = tensor_a.to("gpu") + tensor_b + tensor_c + tensor_d
+
+        self.assertEqual(result_cpu.data, result_gpu.data)
+
+        expected_result = 5 + 3 + 4 + 2
+        self.assertEqual(result_cpu.data, expected_result)
+
     def test_mismatching_shapes(self) -> None:
         tensor_a = Tensor(5, device="cpu")
         tensor_b = Tensor([1, 2], device="cpu")
@@ -49,6 +63,49 @@ class TestTensorOps(unittest.TestCase):
         tensor_b = np.array([4, 5, 6])
         with self.assertRaises(ValueError):
             result = tensor_a + tensor_b  # noqa
+
+
+class TestTensorMatMul(unittest.TestCase):
+    def test_vector_matmul(self) -> None:
+        tensor_a = Tensor([1, 2, 3], device="cpu")
+        tensor_b = Tensor([[1], [2], [3]], device="cpu")
+        result_cpu = tensor_a @ tensor_b
+        result_gpu = tensor_a.to("gpu") @ tensor_b.to("gpu")
+        self.assertTrue(np.isscalar(result_cpu.data))
+        self.assertEqual(result_cpu.data, result_gpu.data)
+        self.assertEqual(result_cpu.data, 14)
+
+    def test_matrix_vector_matmul(self) -> None:
+        tensor_a = Tensor([[1, 2], [3, 4]], device="cpu")
+        tensor_b = Tensor([1, 2], device="cpu")
+        result_cpu = tensor_a @ tensor_b
+        result_gpu = tensor_a.to("gpu") @ tensor_b.to("gpu")
+        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
+        np.testing.assert_array_equal(result_cpu.data, np.array([5, 11]))
+
+    def test_matrix_matmul(self) -> None:
+        tensor_a = Tensor([[1, 2], [3, 4]], device="cpu")
+        tensor_b = Tensor([[5, 6], [7, 8]], device="cpu")
+        result_cpu = tensor_a @ tensor_b
+        result_gpu = tensor_a.to("gpu") @ tensor_b.to("gpu")
+        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
+        np.testing.assert_array_equal(
+            result_cpu.data, np.array([[19, 22], [43, 50]])
+        )
+
+    def test_mismatching_device_matmul(self) -> None:
+        tensor_a = Tensor([[1, 2], [3, 4]], device="cpu")
+        tensor_b = Tensor([[5, 6], [7, 8]], device="gpu")
+        result = tensor_a @ tensor_b
+        np.testing.assert_array_equal(
+            result.data, np.array([[19, 22], [43, 50]])
+        )
+
+    def test_non_tensor_op_matmul(self) -> None:
+        tensor_a = Tensor([[1, 2], [3, 4]], device="cpu")
+        tensor_b = np.array([[5, 6], [7, 8]])
+        with self.assertRaises(ValueError):
+            result = tensor_a @ tensor_b  # noqa
 
 
 if __name__ == "__main__":
