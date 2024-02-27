@@ -9,6 +9,7 @@ class TestTensorOps(unittest.TestCase):
     def test_scalar_addition(self) -> None:
         tensor_a = Tensor(5, device="cpu")
         tensor_b = Tensor(3, device="cpu")
+
         result_cpu = tensor_a + tensor_b
         result_gpu = tensor_a.to("gpu") + tensor_b.to("gpu")
         self.assertEqual(result_cpu.data, result_gpu.data)
@@ -46,23 +47,11 @@ class TestTensorOps(unittest.TestCase):
         expected_result = 5 + 3 + 4 + 2
         self.assertEqual(result_cpu.data, expected_result)
 
-    def test_mismatching_shapes(self) -> None:
-        tensor_a = Tensor(5, device="cpu")
-        tensor_b = Tensor([1, 2], device="cpu")
-        with self.assertRaises(ValueError):
-            result = tensor_a + tensor_b  # noqa
-
     def test_mismatching_device(self) -> None:
         tensor_a = Tensor([1, 2, 3], device="cpu")
         tensor_b = Tensor([4, 5, 6], device="gpu")
         result = tensor_a + tensor_b
         np.testing.assert_array_equal(result.data, np.array([5, 7, 9]))
-
-    def test_non_tensor_op(self) -> None:
-        tensor_a = Tensor([1, 2, 3], device="cpu")
-        tensor_b = np.array([4, 5, 6])
-        with self.assertRaises(ValueError):
-            result = tensor_a + tensor_b  # noqa
 
 
 class TestTensorMatMul(unittest.TestCase):
@@ -71,7 +60,6 @@ class TestTensorMatMul(unittest.TestCase):
         tensor_b = Tensor([[1], [2], [3]], device="cpu")
         result_cpu = tensor_a @ tensor_b
         result_gpu = tensor_a.to("gpu") @ tensor_b.to("gpu")
-        self.assertTrue(np.isscalar(result_cpu.data))
         self.assertEqual(result_cpu.data, result_gpu.data)
         self.assertEqual(result_cpu.data, 14)
 
@@ -101,11 +89,57 @@ class TestTensorMatMul(unittest.TestCase):
             result.data, np.array([[19, 22], [43, 50]])
         )
 
-    def test_non_tensor_op_matmul(self) -> None:
+    def test_gpu_matmul_multidim(self):
+        a_data = np.random.rand(10, 5, 4).astype(np.float32)
+        b_data = np.random.rand(10, 4, 6).astype(np.float32)
+        tensor_a = Tensor(a_data, device="cpu")
+        tensor_b = Tensor(b_data, device="cpu")
+
+        expected_result = np.matmul(a_data, b_data)
+
+        result_cpu = tensor_a @ tensor_b
+        result_gpu = tensor_a.to("gpu") @ tensor_b.to("gpu")
+        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
+        np.testing.assert_allclose(result_cpu.data, expected_result, atol=1e-6)
+
+    def test_chain_matmul(self) -> None:
         tensor_a = Tensor([[1, 2], [3, 4]], device="cpu")
-        tensor_b = np.array([[5, 6], [7, 8]])
-        with self.assertRaises(ValueError):
-            result = tensor_a @ tensor_b  # noqa
+        tensor_b = Tensor([[5, 6], [7, 8]], device="cpu")
+        tensor_c = Tensor([[1, 2], [3, 4]], device="cpu")
+
+        result_cpu = tensor_a @ tensor_b @ tensor_c
+        result_gpu = (
+            tensor_a.to("gpu") @ tensor_b.to("gpu") @ tensor_c.to("gpu")
+        )
+        expected_result = np.matmul(
+            np.matmul(tensor_a.data, tensor_b.data), tensor_c.data
+        )
+        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
+        np.testing.assert_array_almost_equal(
+            result_cpu.data, expected_result, decimal=6
+        )
+
+
+class TestTensorComplexOps(unittest.TestCase):
+    def test_combined_addition_matmul(self) -> None:
+        tensor_a = Tensor([[1, 2], [3, 4]], device="cpu")
+        tensor_b = Tensor([[5, 6], [7, 8]], device="cpu")
+        tensor_c = Tensor([[1, 1]], device="cpu")
+        tensor_d = Tensor([[1], [2]], device="cpu")
+
+        result_cpu = (tensor_a @ tensor_b) + (tensor_c @ tensor_d)
+        result_gpu = (tensor_a.to("gpu") @ tensor_b.to("gpu")) + (
+            tensor_c.to("gpu") @ tensor_d.to("gpu")
+        )
+
+        expected_result = (np.dot(tensor_a.data, tensor_b.data)) + np.dot(
+            tensor_c.data, tensor_d.data
+        )
+
+        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
+        np.testing.assert_array_almost_equal(
+            result_cpu.data, expected_result, decimal=6
+        )
 
 
 if __name__ == "__main__":

@@ -26,17 +26,20 @@ def gpu_add(a: GPUArray, b: GPUArray) -> GPUArray:
 def gpu_matmul(a: GPUArray, b: GPUArray) -> GPUArray:
     if a.shape[1] != b.shape[0]:
         raise ValueError(
-            "A's columns must be the same as B's rows for matrix multiplication."
+            "A's last dimension be the same as B's second-to-last dimension for matrix multiplication."
         )
 
-    matmul = kernels.compile("matmul")
-    result = cuda.mem_alloc(a.shape[0] * b.shape[1] * a.dtype.itemsize)
+    output_shape = a.shape[:-1] + b.shape[-2:]
 
     block_size = (16, 16, 1)
     grid_size = (
-        (b.shape[1] + block_size[0] - 1) // block_size[0],
-        (a.shape[0] + block_size[1] - 1) // block_size[1],
+        (output_shape[-1] + block_size[0] - 1) // block_size[0],
+        (output_shape[-2] + block_size[1] - 1) // block_size[1],
     )
+
+    result = cuda.mem_alloc(np.prod(output_shape) * a.dtype.itemsize)
+    matmul = kernels.compile("matmul")
+
     matmul(
         a,
         b,
