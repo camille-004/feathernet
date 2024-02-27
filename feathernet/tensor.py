@@ -4,7 +4,7 @@ from numpy.typing import ArrayLike
 
 from feathernet.common.types import DeviceType, ShapeType
 from feathernet.ir.core import Node
-from feathernet.ir.ops import AddNode
+from feathernet.ir.ops import AddNode, SubNode
 from feathernet.tensor_utils import (
     broadcast_shapes,
     perform_matmul,
@@ -169,3 +169,15 @@ class Tensor:
 
         add_node = AddNode([self, other])
         return Tensor(add_node, device=self.device).evaluate()
+
+    def __sub__(self, other: "Tensor") -> "Tensor":
+        other = convert_to_tensor(other, device=self.device)
+        if np.isscalar(other.data) or other.shape == (1, 1):
+            other_shape = broadcast_shapes(self.shape, other.shape)
+            other_data = np.full(other_shape, other.data, dtype=self.dtype)
+            other = Tensor(other_data, device=self.device)
+        else:
+            _, other, _, _ = self._prepare(other, "subtraction")
+
+        sub_node = SubNode([self, other])
+        return Tensor(sub_node, device=self.device).evaluate()

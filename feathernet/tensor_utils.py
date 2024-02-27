@@ -18,7 +18,7 @@ def prepare_tensors(
             raise ValueError(
                 f"Shape mismatch for matrix multiplication: {a.shape} and {b.shape}."
             )
-    elif operation == "addition":
+    elif operation in ["addition", "subtraction"]:
         if np.isscalar(a.data) or np.isscalar(b.data):
             self_shape, other_shape = broadcast_shapes(a.shape, b.shape)
         elif a.shape != b.shape:

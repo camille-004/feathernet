@@ -5,7 +5,7 @@ import numpy as np
 from feathernet.tensor import Tensor
 
 
-class TestTensorOps(unittest.TestCase):
+class TestTensorAdd(unittest.TestCase):
     def test_scalar_addition(self) -> None:
         tensor_a = Tensor(5, device="cpu")
         tensor_b = Tensor(3, device="cpu")
@@ -52,6 +52,55 @@ class TestTensorOps(unittest.TestCase):
         tensor_b = Tensor([4, 5, 6], device="gpu")
         result = tensor_a + tensor_b
         np.testing.assert_array_equal(result.data, np.array([5, 7, 9]))
+
+
+class TestTensorSub(unittest.TestCase):
+    def test_scalar_subtraction(self) -> None:
+        tensor_a = Tensor(5, device="cpu")
+        tensor_b = Tensor(3, device="cpu")
+
+        result_cpu = tensor_a - tensor_b
+        result_gpu = tensor_a.to("gpu") - tensor_b.to("gpu")
+        self.assertEqual(result_cpu.data, result_gpu.data)
+        self.assertEqual(result_cpu.data, 2)
+
+    def test_vector_subtraction(self) -> None:
+        tensor_a = Tensor([1, 2, 3], device="cpu")
+        tensor_b = Tensor([4, 5, 6], device="cpu")
+        result_cpu = tensor_a - tensor_b
+        result_gpu = tensor_a.to("gpu") - tensor_b.to("gpu")
+        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
+        np.testing.assert_array_equal(result_cpu.data, np.array([-3, -3, -3]))
+
+    def test_matrix_subtraction(self) -> None:
+        tensor_a = Tensor([[1, 2], [3, 4]], device="cpu")
+        tensor_b = Tensor([[5, 6], [7, 8]], device="cpu")
+        result_cpu = tensor_a - tensor_b
+        result_gpu = tensor_a.to("gpu") - tensor_b.to("gpu")
+        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
+        np.testing.assert_array_equal(
+            result_cpu.data, np.array([[-4, -4], [-4, -4]])
+        )
+
+    def test_scalar_subtraction_multiple_subtrahends(self) -> None:
+        tensor_a = Tensor(5, device="cpu")
+        tensor_b = Tensor(3, device="cpu")
+        tensor_c = Tensor(4, device="cpu")
+        tensor_d = Tensor(2, device="cpu")
+
+        result_cpu = tensor_a - tensor_b - tensor_c - tensor_d
+        result_gpu = tensor_a.to("gpu") - tensor_b - tensor_c - tensor_d
+
+        self.assertEqual(result_cpu.data, result_gpu.data)
+
+        expected_result = 5 - 3 - 4 - 2
+        self.assertEqual(result_cpu.data, expected_result)
+
+    def test_mismatching_device(self) -> None:
+        tensor_a = Tensor([1, 2, 3], device="cpu")
+        tensor_b = Tensor([4, 5, 6], device="gpu")
+        result = tensor_a - tensor_b
+        np.testing.assert_array_equal(result.data, np.array([-3, -3, -3]))
 
 
 class TestTensorMatMul(unittest.TestCase):

@@ -7,6 +7,11 @@ class AddNode(Node):
         super().__init__(operands, op_type=OpType.ADD)
 
 
+class SubNode(Node):
+    def __init__(self, operands: list["Node"] = []) -> None:
+        super().__init__(operands, op_type=OpType.SUB)
+
+
 class MatMulNode(Node):
     def __init__(self, operands: list["Node"] = []) -> None:
         super().__init__(operands, op_type=OpType.MATMUL)
