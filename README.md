@@ -15,8 +15,9 @@
 <table class="no-border">
   <tr>
     <td><img alt="Codecov" src="https://img.shields.io/codecov/c/github/camille-004/feathernet?style=for-the-badge"></td>
-    <td><img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/camille-004/feathernet/ci.yml?style=for-the-badge"></td>
-    <td><img alt="GitHub top language" src="https://img.shields.io/github/languages/top/camille-004/feathernet?style=for-the-badge"></td>
+    <td><img alt="GitLab Workflow Status" src="https://img.shields.io/gitlab/pipeline-status/camille-004%2Ffeathernet?style=for-the-badge"></td>
+    <td><img alt="GitLab Language Count" src="https://img.shields.io/gitlab/languages/count/camille-004%2Ffeathernet?style=for-the-badge
+"></td>
 </table>
 
 ---
