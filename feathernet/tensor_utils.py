@@ -1,8 +1,21 @@
 import numpy as np
+from pycuda.gpuarray import GPUArray
 
 from feathernet.common.enums import OpType
 from feathernet.common.types import DeviceType, ShapeType
 from feathernet.ir.ops import MatMulNode
+
+
+def gpuarray_to_numpy(array: GPUArray) -> np.ndarray:
+    if isinstance(array, GPUArray):
+        return array.get()
+    elif isinstance(array, np.ndarray):
+        vfunc = np.vectorize(
+            lambda x: gpuarray_to_numpy(x) if isinstance(x, GPUArray) else x
+        )
+        return vfunc(array)
+    else:
+        return array
 
 
 def prepare_tensors(
@@ -35,26 +48,23 @@ def prepare_tensors(
 def perform_matmul(
     a: "Tensor",
     b: "Tensor",
-    self_shape: ShapeType | None,
-    other_shape: ShapeType | None,
 ) -> tuple[MatMulNode, DeviceType, ShapeType, np.dtype]:
-    if len(a.shape) > 2 or len(b.shape) > 2:
-        self_flattened_shape = (-1,) + a.shape[-2:]
-        other_flattened_shape = (-1,) + b.shape[-2:]
-        self_flattened = a.reshape(self_flattened_shape)
-        other_flattened = b.reshape(other_flattened_shape)
-        matmul_node = MatMulNode([self_flattened, other_flattened])
-    else:
-        matmul_node = MatMulNode([a, b])
+    if len(a.shape) == 1:
+        a = a.reshape((1,) + a.shape)  # Vector as 1xN matrix.
+    if len(b.shape) == 1:
+        b = b.reshape(b.shape + (1,))  # Vector as Nx1 matrix.
 
-    result_shape = (
-        (a.shape[0], b.shape[1])
-        if len(a.shape) > 1 and len(b.shape) > 1
-        else None
-    )
-    result_dtype = a.dtype if self_shape and other_shape else None
+    if a.shape[-1] != b.shape[-2]:
+        raise ValueError("Incompatible dimensions for matrix multiplication.")
 
-    return matmul_node, a.device, result_shape, result_dtype
+    out_shape = a.shape[:-1] + b.shape[-1:]
+    if out_shape[-1] == 1 and len(out_shape) > 1:  # Result is a vector.
+        out_shape = (out_shape[0],)
+
+    matmul_node = MatMulNode([a, b])
+    result_dtype = np.result_type(a.dtype, b.dtype)
+
+    return matmul_node, a.device, out_shape, result_dtype
 
 
 def broadcast_shapes(shape1: ShapeType, shape2: ShapeType) -> ShapeType:

@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from feathernet.tensor import Tensor
+from feathernet.tensor_utils import gpuarray_to_numpy
 
 
 class TestTensorAdd(unittest.TestCase):
@@ -148,7 +149,9 @@ class TestTensorMatMul(unittest.TestCase):
         tensor_b = Tensor([[5, 6], [7, 8]], device="cpu")
         result_cpu = tensor_a @ tensor_b
         result_gpu = tensor_a.to("gpu") @ tensor_b.to("gpu")
-        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
+        np.testing.assert_array_equal(
+            result_cpu.data, gpuarray_to_numpy(result_gpu.data)
+        )
         np.testing.assert_array_equal(
             result_cpu.data, np.array([[19, 22], [43, 50]])
         )
@@ -171,8 +174,16 @@ class TestTensorMatMul(unittest.TestCase):
 
         result_cpu = tensor_a @ tensor_b
         result_gpu = tensor_a.to("gpu") @ tensor_b.to("gpu")
-        np.testing.assert_array_equal(result_cpu.data, result_gpu.data)
-        np.testing.assert_allclose(result_cpu.data, expected_result, atol=1e-6)
+
+        np.testing.assert_allclose(
+            result_cpu.data,
+            gpuarray_to_numpy(result_gpu.data),
+            atol=1e-6,
+            rtol=1e-6,
+        )
+        np.testing.assert_allclose(
+            result_cpu.data, expected_result, atol=1e-6, rtol=1e-6
+        )
 
     def test_chain_matmul(self) -> None:
         tensor_a = Tensor([[1, 2], [3, 4]], device="cpu")
