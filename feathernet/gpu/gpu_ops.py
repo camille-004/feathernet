@@ -35,7 +35,6 @@ def gpu_reshape(array: GPUArray, new_shape: tuple) -> GPUArray:
     )
     grid_size = (grid_size_x, 1)
 
-    cuda.Context.synchronize()
     reshape(
         array,
         reshaped,

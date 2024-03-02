@@ -1,58 +1,86 @@
 import numpy as np
-from pycuda.gpuarray import GPUArray
+import pycuda.driver as cuda
+import pycuda.gpuarray as gpuarray
 
-from feathernet.common.enums import OpType
 from feathernet.common.types import DeviceType, ShapeType
+from feathernet.gpu.gpu_ops import gpu_reshape
 from feathernet.ir.ops import MatMulNode
 
+cuda.init()
+context = cuda.Device(0).make_context()
 
-def gpuarray_to_numpy(array: GPUArray) -> np.ndarray:
-    if isinstance(array, GPUArray):
+
+def gpuarray_to_numpy(array: gpuarray.GPUArray) -> np.ndarray:
+    if isinstance(array, gpuarray.GPUArray):
         return array.get()
     elif isinstance(array, np.ndarray):
         vfunc = np.vectorize(
-            lambda x: gpuarray_to_numpy(x) if isinstance(x, GPUArray) else x
+            lambda x: (
+                gpuarray_to_numpy(x) if isinstance(x, gpuarray.GPUArray) else x
+            )
         )
         return vfunc(array)
     else:
         return array
 
 
-def prepare_tensors(
-    a: "Tensor", b: "Tensor", operation: OpType
-) -> tuple[ShapeType | None, ShapeType | None]:
-    self_shape, other_shape = None, None
+def reshape(
+    tensor: "Tensor", new_shape: tuple
+) -> tuple[gpuarray.GPUArray | np.ndarray, DeviceType]:
+    inferred_shape = tuple(
+        np.prod(tensor.shape) // np.prod(new_shape) if dim == -1 else dim
+        for dim in new_shape
+    )
+    if tensor.shape == inferred_shape:
+        return tensor.data, tensor.device
+    if np.prod(tensor.shape) != np.prod(new_shape):
+        raise ValueError(
+            f"Cannot reshape tensor of shape {tensor.shape} to {new_shape}."
+        )
+    if tensor.device == "cpu":
+        reshaped_data = np.reshape(tensor.data, new_shape)
+    elif tensor.device == "gpu":
+        reshaped_data = gpu_reshape(tensor.data, new_shape)
+    else:
+        raise ValueError(f"Unsupported device: {tensor.device}.")
+    return reshaped_data, tensor.device
 
-    if operation == OpType.MATMUL:
-        # Check for vectors.
-        self_shape = a.shape if len(a.shape) > 1 else (1, a.shape[0])
-        other_shape = b.shape if len(b.shape) > 1 else (b.shape[0], 1)
 
-        if self_shape[-1] != other_shape[-2]:
-            raise ValueError(
-                f"Shape mismatch for matrix multiplication: {a.shape} and {b.shape}."
+def transfer_to_device(
+    tensor: "Tensor", device: DeviceType
+) -> tuple[gpuarray.GPUArray | np.ndarray, DeviceType]:
+    if tensor.device == device:
+        return tensor.data, device
+
+    if device == "gpu":
+        if isinstance(tensor.data, np.ndarray):
+            contiguous_data = np.ascontiguousarray(
+                tensor.data, dtype=tensor.data.dtype
             )
-    elif operation in [OpType.ADD, OpType.SUB]:
-        if np.isscalar(a.data) or np.isscalar(b.data):
-            self_shape, other_shape = broadcast_shapes(a.shape, b.shape)
-        elif a.shape != b.shape:
-            raise ValueError(
-                f"Tensors must have the same shape for {operation}."
-            )
-        else:
-            self_shape, other_shape = a.shape, b.shape
+            gpu_data = gpuarray.to_gpu(contiguous_data)
+            return gpu_data, "gpu"
+    elif device == "cpu":
+        if isinstance(tensor.data, gpuarray.GPUArray):
+            cpu_data = tensor.data.get()
+            return cpu_data, "cpu"
+    else:
+        raise ValueError(f"Unsupported device: {device}.")
 
-    return self_shape, other_shape
+
+def matmul_shapes(a: "Tensor", b: "Tensor") -> tuple["Tensor", "Tensor"]:
+    if len(a.shape) == 1:
+        a = a.reshape((1,) + a.shape)  # Vector as 1xN matrix.
+    if len(b.shape) == 1:
+        b = b.reshape(b.shape + (1,))  # Vector as Nx1 matrix.
+
+    return a, b
 
 
 def perform_matmul(
     a: "Tensor",
     b: "Tensor",
-) -> tuple[MatMulNode, DeviceType, ShapeType, np.dtype]:
-    if len(a.shape) == 1:
-        a = a.reshape((1,) + a.shape)  # Vector as 1xN matrix.
-    if len(b.shape) == 1:
-        b = b.reshape(b.shape + (1,))  # Vector as Nx1 matrix.
+) -> tuple[MatMulNode, ShapeType, np.dtype]:
+    a, b = matmul_shapes(a, b)
 
     if a.shape[-1] != b.shape[-2]:
         raise ValueError("Incompatible dimensions for matrix multiplication.")
@@ -64,17 +92,7 @@ def perform_matmul(
     matmul_node = MatMulNode([a, b])
     result_dtype = np.result_type(a.dtype, b.dtype)
 
-    return matmul_node, a.device, out_shape, result_dtype
+    return matmul_node, out_shape, result_dtype
 
 
-def broadcast_shapes(shape1: ShapeType, shape2: ShapeType) -> ShapeType:
-    if not shape1:
-        return shape2
-    elif not shape2:
-        return shape1
-    elif len(shape1) == len(shape2):
-        return tuple(max(s1, s2) for s1, s2 in zip(shape1, shape2))
-    elif len(shape1) < len(shape2):
-        return shape2
-    else:
-        return shape1
+context.pop()
